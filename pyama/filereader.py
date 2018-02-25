@@ -80,6 +80,7 @@ class FileReader:
                 if end_regex and re.search(end_regex, line):
                     segment.add(line)
                     segment = None
+                    end_regex = None
                     continue
 
                 if segment is None:

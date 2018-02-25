@@ -34,7 +34,7 @@ class SnippetReader(SegmentHandler):
 class SnippetWriter(SegmentHandler):
     # (.{0}) will match a zero length name, and thus the segment will be numbered. We do not need a name, this is an
     # out out segment.
-    start_line = 'USE\\s+SNIPPET(.{0})\\s+(.*)'
+    start_line = 'USE\\s+SNIPPET(.{0})\\s+(\\w[\\w\\d_/\\.]*)'
 
     def passes(self):
         '''
@@ -88,7 +88,7 @@ class MdSnippetWriter(SnippetWriter):
     """
 
     def end(self):
-        return '```'
+        return '```\\s*\n'
 
     def handle(self, pass_nr, segment: Segment):
         startline = segment.text[0]

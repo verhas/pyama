@@ -14,9 +14,18 @@ Another issue I faced during my practice is that most of the markup languages do
 allow to include a snippet from other source files. For example usign markdown
 you can have some sample code like
 
-[//]: # (This may be the most platform independent comment)
-```
+[//]: # (USE SNIPPET run.py/run_py)
+```python
+from pyama.configuration import Configuration
+from pyama.snippet import MdSnippetWriter, SnippetReader
+from pyama.processor import Processor
 
+
+MD = Configuration().file(".*\\.md$").handler(MdSnippetWriter())
+PY = Configuration().file(".*\\.py$").handler(SnippetReader())
+
+configs = [MD,PY]
+Processor(configs, "**/*.*").process()
 ``` 
 
 Generating setters and getters is done by the editor. You need pyama when you want   
