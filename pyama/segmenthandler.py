@@ -1,3 +1,4 @@
+# START SNIPPET segmenthandler_py
 class SegmentHandler:
     def passes(self):
         '''
