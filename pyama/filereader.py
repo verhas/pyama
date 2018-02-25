@@ -70,7 +70,9 @@ class FileReader:
                 is_start, name, end_regex_ = self._startsegment(line)
                 if is_start:
                     old = segment
-                    old.next = segment = Segment(name,self.filename)
+                    segment = Segment(name, self.filename)
+                    if old is not None:
+                        old.next = segment
                     segment.previous = old
                     segments.append(segment)
                     end_regex = end_regex_
