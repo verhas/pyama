@@ -4,7 +4,7 @@ class SegmentHandler:
         '''
         :return: the numbers of passes when the handler needs to be invoked. Passes are numbered from 1 upward.
         '''
-        return [ 1 ]
+        return [1]
 
     def start(self):
         '''
@@ -19,5 +19,5 @@ class SegmentHandler:
         '''
         return None
 
-    def handle(self,pass_nr, segment):
+    def handle(self, pass_nr, segment):
         pass

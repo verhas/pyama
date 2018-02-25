@@ -1,11 +1,13 @@
 class Segment:
     def __init__(self, name, filename):
+        # START SNIPPET segment_structure
         self.name = name
         self.filename = filename
         self.text = []
         self.next = None
         self.previous = None
         self.modified = False
+        # END SNIPPET
 
     def add(self, line):
         self.text.append(line)
