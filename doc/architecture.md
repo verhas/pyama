@@ -64,8 +64,33 @@ segments.
 
 ## Handler executions
 
-Pyama
+Pyama exeutes the handlers several times. It does several passes. In each pass it
+goes through all the handlers that are configured and if the actual handler is
+configured to be executed in the actual pass then it is executed for each segment
+in each file. The code that actually does this is included here:
  
 [//]: # (USE SNIPPET */runhandlers)
 ```python
+    def run_handlers(self):
+        for pass_nr in range(1, self.passes + 1):
+            for handler in self.handlers:
+                if pass_nr in handler.passes():
+                    for file in self.files:
+                        for segment in file.segments:
+                            handler.handle(pass_nr, segment)
+
 ```
+
+The handlers define a method `passes()` that return a list of numbers including the passes
+when they have to be included. This is a fairly general approach. Usually the number of
+passes is two. In the first pass the handlers collect information from the files. During
+the second pass some of the handlers modify some of the segments of some of the files.
+
+## Wiring the files
+
+After the execution of all the handlers pyama writes the files that were cahnged.
+
+Be careful especially when you execute some segment handlers that were not fully tested
+before. Before executing pyama commit all changes to the repo and check the result.
+
+Read on about [segment handlers](segmenthandlers.md)
