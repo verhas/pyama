@@ -1,0 +1,21 @@
+this is
+an unnamed segment
+name="segmentOne"
+and this is in the segment segmentOne
+// END SEGMENT
+/*
+ * START anotherSegment
+ */
+public void main(...){
+
+}
+//END SEGMENT
+something else
+
+# PYTHON SEGMENT python_segment
+
+first python segment, no close
+
+# PYTHON SEGMENT python_segment
+
+second python segment till end of file
