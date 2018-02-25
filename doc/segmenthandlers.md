@@ -36,7 +36,6 @@ class SegmentHandler:
         return None
 
     def handle(self, pass_nr, segment):
-        pass
 ```
 
 The methods here are supposed to be overridden.
@@ -113,12 +112,34 @@ regular expression matches the start of the segment.
 If handlers, if needed, should check against their regular expressions the first line
 of the segment they are processing.
 
+The regular expression may also locate the name of the snippet. The name will be the
+first matching group, as returned by `match.group(1)` after the line matched the
+regular expression. This is essentially the part of the regular expression between the
+parentheses.
+
 Also note that there is no restrictions imposed by pyama about the name of the snippet.
 The name of the snippet is just a string for pyama. The snippedt handling routines and
 regular expressions impose restrictions if they have to. In case of the "sample"
 `SnippetReader` class the regular expression returned by the `start()` method
 says that the name of the snippet can be anything that starts with a letter and
 optionally continues with letters, numbers and underscore characters.
+
+When a snippet does not define anything there is no need to have parentheses to define a
+name. On the other hand the same expression may need to be used to extract some of the
+parameters. For example the class `SnippetWriter` defines the start regular
+expression as
+
+```python
+'USE\\s+SNIPPET(.{0})\\s+([\\w\\d_/\\.\\*]+)'
+```
+
+In this case there is no need for a name, but the handler needs some parameters.
+The `(.{0})` matches a zero length string and although in this case there is a
+first matching group the segment is numbered instead of using an empty string as a name.
+
+An alternative possibility could have been to use zwo regular expressions: one for
+identifying the start of the segment and another to extract parameter, which is the
+name of the referenced snippet.
 
 ## `end()`
 
@@ -145,7 +166,97 @@ The structure of a segment is defined in the class `pyama.file.Segment`:
 
 [//]: # (USE SNIPPET */segment_structure)
 ```python
-
+        self.name = name
+        self.filename = filename
+        self.text = []
+        self.next = None
+        self.previous = None
+        self.modified = False
 ```
 
- 
+The `name` is the name of the segment as defined in the snippet starting line or "0", "1",
+and so on. Pyama does not care the uniqueness of the segment names. It is up to the
+handlers how they manage name collisions. For example the handler implemented in the
+class `pyama.snippet.SnippetReader` concatenates the snippets that come from
+different segments having the same name.
+
+The `filename` the full path name of the file that was used to open the file for reading
+that contains the segment. It can be used by the handler to avoid handling files that
+it can not handle. If there is, for example, a handler that can handle only Python files
+then this field can be used to ensure to manage only segments that belong to a file that
+has `.py` extension.
+
+The `text` contains the lines of the segments. Each source line includes the terminating
+new line, if there is any. (The last line in the file may not contain one.)
+
+The fiels `next` and `previous` link the segments together within one file and they are
+available for the handlers if the want to traverse the segments in a single invocation.
+
+The field `modified` SHOULD be set to `True` if the handler modified the segment. Pyama
+writes back changes to the files only for files that have at least one segment with
+this field set to `True`.
+
+To see two example we will look at the implementation of the `handler()` method of the
+classes `SnippetWriter` and the class `MdSnippetWriter`.
+
+### `SnippetWriter.handle()`
+
+[//]: # (USE SNIPPET */SnippetWriter_handle)
+```python
+    def handle(self, pass_nr, segment: Segment):
+        startline = segment.text[0]
+        match = re.search(SnippetWriter.start_line, startline)
+        if not match:
+            return
+        text = self._get_modified_text(match.group(2))
+        if not text:
+            return
+        segment.text = [segment.text[0]] + text[1:len(text) - 1] + [segment.text[len(segment.text) - 1]]
+        segment.modified = True
+```
+
+The handler first fetches the first line of the segment and checks that it matches its
+`start()` regular expression. This also serves the purpose to get the referenced snippet
+from the line looking at the second matching group.
+
+The private method `_get_modified_text()` method looks up the snippet in the dictionary
+that was built up in the previous pass by the class `SnippetReader`. If there is some text found
+in the dictionary then it modifies the segment lines.
+
+The handler is careful to keep the original first line of the segment because it has to find it again when 
+it is executed again. Also the last line that terminates the segment is preserved.
+
+The new lines between these two lines are the text from the other segment that was referenced.
+Note that the first and the last line of the source segment, which gets copied here are removed. They
+are not needed here. We only need the the code sample.
+
+The last action when the segment is modified is to signal the modification setting the `modified` field
+to `True`.
+
+### `MdSnippetWriter.handle()`
+
+[//]: # (USE SNIPPET */MdSnippetWriter_handle)
+```python
+    def handle(self, pass_nr, segment: Segment):
+        if not re.search(".*\\.md$",segment.filename):
+            return
+        startline = segment.text[0]
+        match = re.search(SnippetWriter.start_line, startline)
+        if not match:
+            return
+        text = self._get_modified_text(match.group(2))
+        if not text:
+            return
+        segment.text = [segment.text[0], segment.text[1]] + \
+                       text[1:len(text) - 1] + \
+                       [segment.text[len(segment.text) - 1]]
+        segment.modified = True
+```
+
+The class `MdSnippetWriter` extends the class `SnippetWriter` this it has access to the same "private" methods.
+The only difference is that it checks that the file name has `.md` extension and it keeps not only the first but
+also the second line of the original segment. It is because the first line is the 
+one that signals the start of the snippet use and the second line is the three backtick that starts the 
+markdown code listing.
+
+The final statement is signalling the modification of the segment.

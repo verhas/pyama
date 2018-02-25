@@ -70,15 +70,18 @@ class SnippetWriter(SegmentHandler):
                 return text
         return text
 
+    # START SNIPPET SnippetWriter_handle
     def handle(self, pass_nr, segment: Segment):
         startline = segment.text[0]
         match = re.search(SnippetWriter.start_line, startline)
-        if match:
-            text = self._get_modified_text(match.group(2))
-            if text:
-                segment.text = [segment.text[0]] + text[1:len(text) - 1] + [segment.text[len(segment.text) - 1]]
-                segment.modified = True
-
+        if not match:
+            return
+        text = self._get_modified_text(match.group(2))
+        if not text:
+            return
+        segment.text = [segment.text[0]] + text[1:len(text) - 1] + [segment.text[len(segment.text) - 1]]
+        segment.modified = True
+    # END SNIPPET
 
 class MdSnippetWriter(SnippetWriter):
     """
@@ -90,13 +93,19 @@ class MdSnippetWriter(SnippetWriter):
     def end(self):
         return '```\\s*\n'
 
+    # START SNIPPET MdSnippetWriter_handle
     def handle(self, pass_nr, segment: Segment):
+        if not re.search(".*\\.md$",segment.filename):
+            return
         startline = segment.text[0]
         match = re.search(SnippetWriter.start_line, startline)
-        if match:
-            text = self._get_modified_text(match.group(2))
-            if text:
-                segment.text = [segment.text[0], segment.text[1]] + \
-                               text[1:len(text) - 1] + \
-                               [segment.text[len(segment.text) - 1]]
-                segment.modified = True
+        if not match:
+            return
+        text = self._get_modified_text(match.group(2))
+        if not text:
+            return
+        segment.text = [segment.text[0], segment.text[1]] + \
+                       text[1:len(text) - 1] + \
+                       [segment.text[len(segment.text) - 1]]
+        segment.modified = True
+    # END SNIPPET
