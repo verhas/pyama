@@ -24,8 +24,9 @@ class Processor:
 
     def write_files(self):
         for file in self.files:
-            writer = FileWriter(file)
-            writer.write()
+            if file.modified():
+                writer = FileWriter(file)
+                writer.write()
 
 
     def process(self):
