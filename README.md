@@ -97,11 +97,27 @@ be available in a python dictionary.
 
 Similarly segments in the markdown files starts with 
 
-```markdown
-[//]: # (USE SNIPPET run.py/run_py)
+
+```
+[//]: # (USE SNIPPET run.py/run__py)
 ```
 
 and ends with a line that contains only three backtick. The keywords `USE SNIPPET` tell
 pyama to start a new segment and the `run.py/run_py` tells the segment handler
 `MdSnippetWriter` that it has to replace the content of the segment as it is now
-to the snippet that came from the file `run.py` and is named `run_py`.
+to the snippet that came from the file `run.py` and is named `run_py`. (Note that in the
+sample above I had to replace `run_py` with `run__py` otherwise pyama was recognizing
+it as something it could process.)
+
+## More documentation
+
+If you have the segment handlers and can run python code and you are satisfied then 
+there is no point to read on. The application can be installed with minimal python
+infrastucture knowledge and the `run.py` can easily be created without really
+understanding python.
+
+However if you need something that is not available and want to write segment handler(s)
+then go on.
+
+* [Architecture, structure of pyama](./doc/architecture.md)
+* [Writing segment handlers](./doc/segmenthandlers.md)
