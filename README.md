@@ -1,8 +1,8 @@
 # pyama
 
-pyama is a Python based modular command line text processor.
-
-Pyama can be used to generate and modify text source files in any programming languages.
+Pyama is a command line automated editor that performs some of the tasks that are
+otherwise performed manually using some editors. It can be used to modify text
+source files in any programming languages inserting or updating boiler plate code.
 
 Modifying the source code programmatically is usually not a good practice. Don't do
 that if it is possible. Pyama is a practical tool to amend the code editing workflow.
