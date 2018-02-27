@@ -6,13 +6,15 @@ import unittest
 from pyama.configuration import Configuration
 from pyama.javahandler import JavaHandler
 from pyama.processor import Processor
-
+from pyama.licensehandler import LicenseHandler
 
 class TestProcessor(unittest.TestCase):
     def testProcessing(self):
+        licensehandler = LicenseHandler()
+        licensehandler.license("license.txt")
         JAVA = Configuration() \
             .file(".*\\.java") \
-            .handler(JavaHandler())
+            .handler(JavaHandler(),licensehandler)
 
         configs = [JAVA]
         processor = Processor(configs, "../test/*.java")

@@ -21,11 +21,11 @@ from pyama.configuration import Configuration
 from pyama.snippet import MdSnippetWriter, SnippetReader
 from pyama.processor import Processor
 
-
-MD = Configuration().file(".*\\.md$").handler(MdSnippetWriter())
+MD = Configuration().file(".*\\.md$").handler(MdSnippetWriter(),SnippetReader())
 PY = Configuration().file(".*\\.py$").handler(SnippetReader())
 
-configs = [MD,PY]
+configs = [MD, PY]
+
 Processor(configs, "**/*.*").process()
 ``` 
 
@@ -76,9 +76,9 @@ in each file. The code that actually does this is included here:
             for handler in self.handlers:
                 if pass_nr in handler.passes():
                     for file in self.files:
-                        for segment in file.segments:
-                            handler.handle(pass_nr, segment)
-
+                        if self.file_handler_match(file,handler):
+                            for segment in file.segments:
+                                handler.handle(pass_nr, segment)
 ```
 
 The handlers define a method `passes()` that return a list of numbers including the passes

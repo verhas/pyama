@@ -6,11 +6,10 @@ from pyama.configuration import Configuration
 from pyama.snippet import MdSnippetWriter, SnippetReader
 from pyama.processor import Processor
 
-
-MD = Configuration().file(".*\\.md$").handler(MdSnippetWriter())
+MD = Configuration().file(".*\\.md$").handler(MdSnippetWriter(),SnippetReader())
 PY = Configuration().file(".*\\.py$").handler(SnippetReader())
 
-configs = [MD,PY]
+configs = [MD, PY]
+
 Processor(configs, "**/*.*").process()
 # END SNIPPET
-

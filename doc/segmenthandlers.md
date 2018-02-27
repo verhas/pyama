@@ -211,7 +211,7 @@ classes `SnippetWriter` and the class `MdSnippetWriter`.
         text = self._get_modified_text(match.group(2))
         if not text:
             return
-        segment.text = [segment.text[0]] + text[1:len(text) - 1] + [segment.text[len(segment.text) - 1]]
+        segment.text = [segment.text[0]] + text[1:-1] + [segment.text[-1]]
         segment.modified = True
 ```
 
@@ -238,7 +238,7 @@ to `True`.
 [//]: # (USE SNIPPET */MdSnippetWriter_handle)
 ```python
     def handle(self, pass_nr, segment: Segment):
-        if not re.search(".*\\.md$",segment.filename):
+        if not re.search(".*\\.md$", segment.filename):
             return
         startline = segment.text[0]
         match = re.search(SnippetWriter.start_line, startline)
@@ -248,8 +248,8 @@ to `True`.
         if not text:
             return
         segment.text = [segment.text[0], segment.text[1]] + \
-                       text[1:len(text) - 1] + \
-                       [segment.text[len(segment.text) - 1]]
+                       text[1:-1] + \
+                       [segment.text[-1]]
         segment.modified = True
 ```
 

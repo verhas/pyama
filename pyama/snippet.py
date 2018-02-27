@@ -22,13 +22,16 @@ class SnippetReader(SegmentHandler):
 
     def handle(self, pass_nr, segment: Segment):
         startline = segment.text[0]
-        if re.search(SnippetReader.start_line, startline):
-            if segment.filename not in snippets:
-                snippets[segment.filename] = {}
-            if segment.name not in snippets[segment.filename]:
-                snippets[segment.filename][segment.name] = []
-
-            snippets[segment.filename][segment.name] += segment.text
+        if not re.search(SnippetReader.start_line, startline):
+            return
+        if segment.filename not in snippets:
+            snippets[segment.filename] = {}
+        if segment.name not in snippets[segment.filename]:
+            snippets[segment.filename][segment.name] = segment.text
+        else:
+            # concatenating snippets remove the start line from the appended snippet and the end line from the
+            # already stored snippet
+            snippets[segment.filename][segment.name] = snippets[segment.filename][segment.name][:-1] + segment.text[1:]
 
 
 class SnippetWriter(SegmentHandler):
@@ -79,9 +82,10 @@ class SnippetWriter(SegmentHandler):
         text = self._get_modified_text(match.group(2))
         if not text:
             return
-        segment.text = [segment.text[0]] + text[1:len(text) - 1] + [segment.text[len(segment.text) - 1]]
+        segment.text = [segment.text[0]] + text[1:-1] + [segment.text[-1]]
         segment.modified = True
     # END SNIPPET
+
 
 class MdSnippetWriter(SnippetWriter):
     """
@@ -95,7 +99,7 @@ class MdSnippetWriter(SnippetWriter):
 
     # START SNIPPET MdSnippetWriter_handle
     def handle(self, pass_nr, segment: Segment):
-        if not re.search(".*\\.md$",segment.filename):
+        if not re.search(".*\\.md$", segment.filename):
             return
         startline = segment.text[0]
         match = re.search(SnippetWriter.start_line, startline)
@@ -105,7 +109,7 @@ class MdSnippetWriter(SnippetWriter):
         if not text:
             return
         segment.text = [segment.text[0], segment.text[1]] + \
-                       text[1:len(text) - 1] + \
-                       [segment.text[len(segment.text) - 1]]
+                       text[1:-1] + \
+                       [segment.text[-1]]
         segment.modified = True
     # END SNIPPET

@@ -38,11 +38,11 @@ from pyama.configuration import Configuration
 from pyama.snippet import MdSnippetWriter, SnippetReader
 from pyama.processor import Processor
 
-
-MD = Configuration().file(".*\\.md$").handler(MdSnippetWriter())
+MD = Configuration().file(".*\\.md$").handler(MdSnippetWriter(),SnippetReader())
 PY = Configuration().file(".*\\.py$").handler(SnippetReader())
 
-configs = [MD,PY]
+configs = [MD, PY]
+
 Processor(configs, "**/*.*").process()
 ``` 
 
@@ -109,11 +109,25 @@ to the snippet that came from the file `run.py` and is named `run_py`. (Note tha
 sample above I had to replace `run_py` with `run__py` otherwise pyama was recognizing
 it as something it could process.)
 
+## Precooked handlers
+
+Pyama comes with an ever expanding list of pre cooked handlers. These are
+
+* [snippet handler](./doc/snippet.md) can recognize code snippets in program source files
+and can copy these into documentation files (especially into markdown files) 
+
+* [javahandler](./doc/javahandler.md) can create constructors, setters, getters, `equals`
+and `hashCode` methods as well as `toString` in Java classes.
+
+* [licensehandler](./doc/licensehandler.md) can check that each file has a license text
+at the start of it and inserts the license text if it was not there or updates the text
+if it changed in a separate sample license file
+
 ## More documentation
 
 If you have the segment handlers and can run python code and you are satisfied then 
 there is no point to read on. The application can be installed with minimal python
-infrastucture knowledge and the `run.py` can easily be created without really
+infrastructure knowledge and the `run.py` can easily be created without really
 understanding python.
 
 However if you need something that is not available and want to write segment handler(s)
