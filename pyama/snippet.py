@@ -1,8 +1,11 @@
 from pyama.segmenthandler import SegmentHandler
 from pyama.file import Segment
 import re
+import logging
 
 snippets = {}
+
+logger = logging.getLogger(__name__)
 
 
 class SnippetReader(SegmentHandler):
@@ -27,10 +30,12 @@ class SnippetReader(SegmentHandler):
         if segment.filename not in snippets:
             snippets[segment.filename] = {}
         if segment.name not in snippets[segment.filename]:
+            logger.debug("Starting snippet %s" % segment.name)
             snippets[segment.filename][segment.name] = segment.text
         else:
             # concatenating snippets remove the start line from the appended snippet and the end line from the
             # already stored snippet
+            logger.debug("Continuing snippet %s" % segment.name)
             snippets[segment.filename][segment.name] = snippets[segment.filename][segment.name][:-1] + segment.text[1:]
 
 
@@ -54,7 +59,7 @@ class SnippetWriter(SegmentHandler):
     def _get_modified_text(self, snippet_reference):
         match = re.search("(.*)/(\\w[\\w\\d_]*)", snippet_reference)
         if not match:
-            print("ERROR: '%s' reference is not file/name format" % snippet_reference)
+            logger.warning("'%s' reference is not file/name format" % snippet_reference)
         file = match.group(1)
         snippet = match.group(2)
         return self._get_snippet_text(file, snippet)
@@ -64,17 +69,30 @@ class SnippetWriter(SegmentHandler):
             text = self.find_joker_snippet(snippet)
         else:
             text = file in snippets and snippet in snippets[file] and snippets[file][snippet]
+            if not text:
+                logger.warning("snippet %s/%s is not defined" % (file, snippet))
+            logger.debug("snippet %s/%s is %s" % (file, snippet, text))
         return text
 
     def find_joker_snippet(self, snippet):
+        found_nr = 0
+        text = False
         for k, v in snippets.items():
-            text = snippet in v and v[snippet]
-            if text:
-                return text
+            found = snippet in v and v[snippet]
+            if found:
+                if text:
+                    text = text[:-1] + found[1:]
+                else:
+                    text = found
+                found_nr += 1
+        if found_nr == 0:
+            logger.warning("undefined snippet %s is used" % snippet)
+        if found_nr > 1:
+            logger.warning("used snippet %s is defined in multiple files" % snippet)
         return text
 
     # START SNIPPET SnippetWriter_handle
-    def handle(self, pass_nr, segment: Segment):
+    def handle(self, pass_nr, segment):
         startline = segment.text[0]
         match = re.search(SnippetWriter.start_line, startline)
         if not match:
@@ -108,8 +126,11 @@ class MdSnippetWriter(SnippetWriter):
         text = self._get_modified_text(match.group(2))
         if not text:
             return
-        segment.text = [segment.text[0], segment.text[1]] + \
-                       text[1:-1] + \
-                       [segment.text[-1]]
-        segment.modified = True
+        if len(segment.text) < 2:
+            logger.warning("segment %s/%s is too short, can not be processed" % (segment.filename,segment.name))
+        else:
+            segment.text = [segment.text[0], segment.text[1]] + \
+                           text[1:-1] + \
+                           [segment.text[-1]]
+            segment.modified = True
     # END SNIPPET
