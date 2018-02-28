@@ -13,8 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import java.util.Map;
 
+/**
+ * This is a Javadoc
+ *
+ */
 public class MyClass implements ScriptBasic {
 
     // FIELDS
