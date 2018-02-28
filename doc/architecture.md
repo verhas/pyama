@@ -78,7 +78,7 @@ in each file. The code that actually does this is included here:
             for handler in self.handlers:
                 if pass_nr in handler.passes():
                     for file in self.files:
-                        if self.file_handler_match(file,handler):
+                        if self.file_handler_match(file, handler):
                             for segment in file.segments:
                                 handler.handle(pass_nr, segment)
 ```
