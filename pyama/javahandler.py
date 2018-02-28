@@ -64,35 +64,9 @@ class JavaHandler(SegmentHandler):
     def handle_fields(self, segment: Segment):
         self.fields = []
         for line in segment.text[1:len(segment.text) - 1]:
-            if re.search("\\s*//", line):
+            if re.search("^\\s*//", line):
                 continue
-            var = Var()
-            var.assigned = not line.find("=") == -1
-            for tag in space.split(line):
-                if tag == "final":
-                    var.final = True
-                    continue
-
-                if tag == "static":
-                    var.static = True
-                    continue
-
-                if tag in ["private", "protected", "public"]:
-                    var.access = tag
-                    continue
-
-                if tag in ["transient", "volatile"]:
-                    continue
-
-                if len(tag) > 0:
-                    if var.type is None:
-                        var.type = tag
-                        continue
-
-                    if var.name is None:
-                        var.name = tag
-                        break
-
+            var = Var(line)
             self.fields.append(var)
 
     def handle_constructor(self, segment):
@@ -125,8 +99,8 @@ class JavaHandler(SegmentHandler):
         text = []
         for var in self.fields:
             if var.need_getter() or for_all:
-                text.append("    public %s %s(){\n        return this.%s;\n    }\n" % (
-                    var.type, var.getter_name(), var.name))
+                text.append("    %s%s %s(){\n        return this.%s;\n    }\n" %
+                            (var.getter_modifier, var.type, var.getter_name(), var.name))
         segment.text = [segment.text[0]] + text + [segment.text[-1]]
         segment.modified = True
 
@@ -136,9 +110,8 @@ class JavaHandler(SegmentHandler):
         text = []
         for var in self.fields:
             if var.need_setter() or (for_all and var.maybe_setter()):
-                text.append("    public void %s(final %s %s){\n        this.%s = %s;\n    }\n" % (
-                    var.setter_name(),
-                    var.type, var.name, var.name, var.name))
+                text.append("    %svoid %s(final %s %s){\n        this.%s = %s;\n    }\n" %
+                            (var.setter_modifier, var.setter_name(), var.type, var.name, var.name, var.name))
         segment.text = [segment.text[0]] + text + [segment.text[-1]]
         segment.modified = True
 
@@ -280,7 +253,7 @@ class JavaHandler(SegmentHandler):
             else "if (o == null || getClass() != o.getClass()) return false;"
         return classtest
 
-    def handle_tostring(self,segment):
+    def handle_tostring(self, segment):
         line = segment.text[0]
         with_getters = re.search("with\\s+getters", line)
         text = []
@@ -290,7 +263,7 @@ class JavaHandler(SegmentHandler):
 """ % self.classname)
         for var in self.fields:
             variable_name = var.getter_name() + "()" if with_getters else var.name
-            text.append('        sb.append("%s=").append(%s);\n' % (variable_name,variable_name))
+            text.append('        sb.append("%s=").append(%s);\n' % (variable_name, variable_name))
         text.append("""        sb.append('}');
         return sb.toString();
     }
@@ -298,8 +271,9 @@ class JavaHandler(SegmentHandler):
         segment.text = [segment.text[0]] + text + [segment.text[-1]]
         segment.modified = True
 
+
 class Var:
-    def __init__(self):
+    def __init__(self,line):
         self.access = "package"
         self.type = None
         self.name = None
@@ -307,7 +281,54 @@ class Var:
         self.static = False
         self.type = None
         self.name = None
-        self.assigned = None
+        self.getter_forced = False
+        self.setter_forced = False
+        self.constructor_forced = False
+
+        self.assigned = not line.find("=") == -1
+
+        self.setter_modifier = "public "
+        self.getter_modifier = "public "
+        if re.search(".*//.*protected\\s+setter", line):
+            self.setter_modifier = "protected "
+        if re.search(".*//.*protected\\s+getter", line):
+            self.getter_modifier = "protected "
+        if re.search(".*//.*package\\s+setter", line):
+            self.setter_modifier = ""
+        if re.search(".*//.*package\\s+getter", line):
+            self.getter_modifier = ""
+        if re.search(".*//.*setter", line):
+            self.setter_forced = True
+        if re.search(".*//.*getter", line):
+            self.getter_forced = True
+        if re.search(".*//.*constructor", line):
+            self.constructor_forced = True
+
+        for tag in space.split(line):
+            if tag == "final":
+                self.final = True
+                continue
+
+            if tag == "static":
+                self.static = True
+                continue
+
+            if tag in ["private", "protected", "public"]:
+                self.access = tag
+                continue
+
+            if tag in ["transient", "volatile"]:
+                continue
+
+            if len(tag) > 0:
+                if self.type is None:
+                    self.type = tag
+                    continue
+
+                if self.name is None:
+                    self.name = tag
+                    # name is the last element we care, if there is init expression we ignore
+                    break
 
     def getter_name(self):
         prefix = "is" if self.type in ["boolean", "Boolean"] else "get"
@@ -317,13 +338,13 @@ class Var:
         return "set" + self.name[:1].upper() + self.name[1:]
 
     def need_constructor(self):
-        return self.final and not self.static and not self.assigned
+        return self.constructor_forced or (self.final and not self.static and not self.assigned)
 
     def need_getter(self):
-        return self.access == "private" and not self.static
+        return self.getter_forced or (self.access == "private" and not self.static)
 
     def need_setter(self):
-        return self.access == "private" and not self.final and not self.static
+        return self.setter_forced or (self.access == "private" and not self.final and not self.static)
 
     def maybe_setter(self):
         return not self.final
