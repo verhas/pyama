@@ -203,7 +203,7 @@ classes `SnippetWriter` and the class `MdSnippetWriter`.
 
 [//]: # (USE SNIPPET */SnippetWriter_handle)
 ```python
-    def handle(self, pass_nr, segment: Segment):
+    def handle(self, pass_nr, segment):
         startline = segment.text[0]
         match = re.search(SnippetWriter.start_line, startline)
         if not match:
@@ -247,10 +247,13 @@ to `True`.
         text = self._get_modified_text(match.group(2))
         if not text:
             return
-        segment.text = [segment.text[0], segment.text[1]] + \
-                       text[1:-1] + \
-                       [segment.text[-1]]
-        segment.modified = True
+        if len(segment.text) < 2:
+            logger.warning("segment %s/%s is too short, can not be processed" % (segment.filename,segment.name))
+        else:
+            segment.text = [segment.text[0], segment.text[1]] + \
+                           text[1:-1] + \
+                           [segment.text[-1]]
+            segment.modified = True
 ```
 
 The class `MdSnippetWriter` extends the class `SnippetWriter` this it has access to the same "private" methods.
