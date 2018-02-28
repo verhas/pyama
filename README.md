@@ -65,7 +65,7 @@ configurable. To use it you do not need to understand Python, though it does not
 
 Typically you will install pyama into your development environment and you create a `run.py`
 file in your development root directory. You can name it any way you want btw. It will
-be a pythong source file. The actual `run.py` of this project you can see above.
+be a python source file. The actual `run.py` of this project you can see above.
 
 Yes it was copied into this md file using pyama. This little program declares the
 configuration that, in this case, says we are using markdown and python source files and
@@ -108,6 +108,23 @@ pyama to start a new segment and the `run.py/run_py` tells the segment handler
 to the snippet that came from the file `run.py` and is named `run_py`. (Note that in the
 sample above I had to replace `run_py` with `run__py` otherwise pyama was recognizing
 it as something it could process.)
+
+## Command line options
+
+```bash
+usage: run.py [-h] [-l LEVEL] [-d] [-b]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -l LEVEL, --level LEVEL
+                        set the logging level explicitly DEBUG, INFO, WARNING,
+                        ERROR or CRITICAL
+  -d, --dry             do not write the changes back to the files
+  -b, --backup          create .BAK for changed files
+```
+
+(This is copied here with manual labour until we will have a handler that can run external program
+and capture the output as a snippet.)
 
 ## Precooked handlers
 
