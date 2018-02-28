@@ -1,5 +1,8 @@
 from pyama.file import Segment, File
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Factory:
@@ -7,8 +10,7 @@ class Factory:
         for configuration in configurations:
             for regex in configuration.filename_regexes:
                 if re.search(regex, filename):
-                    return FileReader(filename,
-                                      regexes=configuration.regexes)
+                    return FileReader(filename, regexes=configuration.regexes)
 
 
 class FileReader:
@@ -43,10 +45,13 @@ class FileReader:
             match = re.search(regex[0], line)
             if match:
                 if match.lastindex and len(match.group(1)) > 0:
-                    return (True, match.group(1), regex[1])
+                    logger.debug("line '%s' matches '%s' and name is '%s'" % (line, regex, match.group(1)))
+                    return True, match.group(1), regex[1]
                 else:
-                    return (True, self.next_segment(), regex[1])
-        return (False, None, None)
+                    name = self.next_segment()
+                    logger.debug("line '%s' matches '%s' and name is '%s'" % (line, regex, name))
+                    return True, name, regex[1]
+        return False, None, None
 
     def next_segment(self):
         """
@@ -80,13 +85,16 @@ class FileReader:
                     continue
 
                 if end_regex and re.search(end_regex, line):
+                    logger.debug("line '%s' matches '%s' segment ending" % (line, end_regex))
                     segment.add(line)
                     segment = None
                     end_regex = None
                     continue
 
                 if segment is None:
-                    segment = Segment(self.next_segment(),self.filename)
+                    name = self.next_segment()
+                    logger.debug("Creating new unnamed segment '%s'" % name)
+                    segment = Segment(name, self.filename)
                     segments.append(segment)
 
                 segment.add(line)
