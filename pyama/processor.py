@@ -22,11 +22,14 @@ class Processor:
                             help="set the logging level explicitly DEBUG, INFO, WARNING, ERROR or CRITICAL")
         parser.add_argument("-d", "--dry", help="do not write the changes back to the files", action="store_true")
         parser.add_argument("-b", "--backup", help="create .BAK for changed files", action="store_true")
+        parser.add_argument("-f", "--logfile", help="create .BAK for changed files")
         args = parser.parse_args()
         if args.level:
             logging.basicConfig(level=args.level)
         else:
             logging.basicConfig(level=logging.WARNING)
+        if args.logfile:
+            logging.getLogger().addHandler(logging.FileHandler(args.logfile))
         self.backup = args.backup
         self.dry_run = args.dry
         if self.dry_run and self.backup:

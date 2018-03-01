@@ -26,7 +26,7 @@ class FileReader:
         segments and the name is identified by group(1) matching the start regex. The line that matches is added to the
         segment as first line.
         '''
-        self.filename = filename
+        self.filename = filename.replace('\\','/')
         self.regexes = regexes
         self.segment_number = 0
 

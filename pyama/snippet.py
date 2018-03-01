@@ -60,6 +60,7 @@ class SnippetWriter(SegmentHandler):
         match = re.search("(.*)/(\\w[\\w\\d_]*)", snippet_reference)
         if not match:
             logger.warning("'%s' reference is not file/name format" % snippet_reference)
+            return None
         file = match.group(1)
         snippet = match.group(2)
         return self._get_snippet_text(file, snippet)
