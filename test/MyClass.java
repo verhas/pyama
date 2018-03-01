@@ -21,12 +21,12 @@ import java.util.Map;
  *
  */
 public class MyClass implements ScriptBasic {
-
+// START SNIPPET fields
     // FIELDS
-    private boolean b;
-    static Boolean B;
-    byte by;
-    Object Obj;
+    private boolean b; // constructor
+    static Boolean B; // setter getter
+    byte by; //package setter package getter
+    Object Obj; // package getter
     Integer I;
     int i;
     long l;
@@ -40,13 +40,18 @@ public class MyClass implements ScriptBasic {
     Double D;
     final double d;
     // END
+// END SNIPPET
 
+// START SNIPPET constructor
     // CONSTRUCTOR
-    public MyClass(final double d) {
+    public MyClass(final boolean b, final double d) {
+        this.b = b;
         this.d = d;
     }
     // END
+//END SNIPPET
 
+// START SNIPPET getters
     // GETTERS for all
     public boolean isB(){
         return this.b;
@@ -54,10 +59,10 @@ public class MyClass implements ScriptBasic {
     public Boolean isB(){
         return this.B;
     }
-    public byte getBy(){
+    byte getBy(){
         return this.by;
     }
-    public Object getObj(){
+    Object getObj(){
         return this.Obj;
     }
     public Integer getI(){
@@ -97,55 +102,22 @@ public class MyClass implements ScriptBasic {
         return this.d;
     }
     // END
+//END SNIPPET
 
-    // SETTERS for all
+// START SNIPPET setters
+    // SETTERS
     public void setB(final boolean b){
         this.b = b;
     }
     public void setB(final Boolean B){
         this.B = B;
     }
-    public void setBy(final byte by){
+    void setBy(final byte by){
         this.by = by;
     }
-    public void setObj(final Object Obj){
-        this.Obj = Obj;
-    }
-    public void setI(final Integer I){
-        this.I = I;
-    }
-    public void setI(final int i){
-        this.i = i;
-    }
-    public void setL(final long l){
-        this.l = l;
-    }
-    public void setL(final Long L){
-        this.L = L;
-    }
-    public void setC(final char c){
-        this.c = c;
-    }
-    public void setC(final Character C){
-        this.C = C;
-    }
-    public void setF(final float f){
-        this.f = f;
-    }
-    public void setF(final Float F){
-        this.F = F;
-    }
-    public void setS(final short s){
-        this.s = s;
-    }
-    public void setS(final Short S){
-        this.S = S;
-    }
-    public void setD(final Double D){
-        this.D = D;
-    }
     // END
-
+//END SNIPPET
+// START SNIPPET equals
     // EQUALS Objects
     @Override
     public boolean equals(Object o) {
@@ -176,7 +148,9 @@ public class MyClass implements ScriptBasic {
         return Objects.hash(b, by, Obj, I, i, l, L, c, C, f, F, s, S, D, d);
     }
     // END
+//END SNIPPET
 
+// START SNIPPET toString
     // TOSTRING with getters
     @Override
     public String toString() {
@@ -201,4 +175,5 @@ public class MyClass implements ScriptBasic {
         return sb.toString();
     }
     // END
+//END SNIPPET
 }
