@@ -40,8 +40,8 @@ from pyama.processor import Processor
 
 MD = Configuration().file(".*\\.md$").handler(MdSnippetWriter(),SnippetReader())
 PY = Configuration().file(".*\\.py$").handler(SnippetReader())
-
-configs = [MD, PY]
+JAVA = Configuration().file(".*\\.java$").handler(SnippetReader())
+configs = [MD, PY, JAVA]
 
 Processor(configs, "**/*.*").process()
 ``` 
