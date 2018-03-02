@@ -44,8 +44,7 @@ the name of the snippet. For example
 ```bash
 USE SNIPPET doc/snippet.md/main_java
 here is something that would be overwritten if we ran a configuration that
-takes the snippet from the above
-END SNIPPET
+     System.out.println("Hello, world!");
 ```
 
 says that the file `doc/snippet.md` contains a snippet named `main_java`. If it really
@@ -84,14 +83,15 @@ To insert the `USE SNIPPET` string into a line into the markdown documentation
 there are different ways. One is to insert HTML comment into the text:
 
 ```markdown
-<!-- USE SNIPPET doc/snippet.md/main_java -->
+<!-- USE SNIPPET filename/snippetname -->
 ```
+
 
 This use will not display the line in the documentation but it will get into the converted
 HTML format. If that bothers you then you can use the empty link structure:
 
 ```markdown
-[//]: # (USE SNIPPET doc/snippet.md/main_java)
+[//]: # (USE SNIPPET filename/snippetname)
 ```
 
 which will not even get into the HTML output of the markdown conversion.
@@ -121,8 +121,8 @@ from pyama.processor import Processor
 
 MD = Configuration().file(".*\\.md$").handler(MdSnippetWriter(),SnippetReader())
 PY = Configuration().file(".*\\.py$").handler(SnippetReader())
-
-configs = [MD, PY]
+JAVA = Configuration().file(".*\\.java$").handler(SnippetReader())
+configs = [MD, PY, JAVA]
 
 Processor(configs, "**/*.*").process()
 ```
