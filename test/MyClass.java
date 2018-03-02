@@ -21,14 +21,15 @@ import java.util.Map;
  *
  */
 public class MyClass {
-// START SNIPPET fields
+// START SNIPPET fields TEMPLATE MATCH (\w[\w\d_]*)\s*=\s*"(.*?)"
+    // VERSION="3.12"
     // FIELDS
     private boolean b; // constructor
     static Boolean bObj; // setter getter
     byte by; //package setter package getter
     Object obj; // package getter
     Integer iObj; // no builder
-    int i;
+    int i; // {VERSION}
     long l;
     Long lObj;
     char c;

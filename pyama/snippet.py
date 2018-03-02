@@ -25,10 +25,19 @@ class SnippetReader(SegmentHandler):
     def end(self):
         return 'END\\s+SNIPPET'
 
+    def fetch_values(self,text,regex):
+        for line in text:
+            match = re.search(regex,line)
+            if match and match.lastindex >= 2:
+                macros[match.group(1)] = match.group(2)
+
     def handle(self, pass_nr, segment: Segment):
         startline = segment.text[0]
         if not re.search(SnippetReader.start_line, startline):
             return
+        match = re.search("MATCH\\s+(.*)$", startline)
+        if match:
+            self.fetch_values(segment.text[1:-1],match.group(1))
         if segment.filename not in snippets:
             snippets[segment.filename] = {}
         if segment.name not in snippets[segment.filename]:
@@ -79,6 +88,9 @@ class SnippetWriter(SegmentHandler):
         return self.processed(text)
 
     def processed(self, text):
+        line = text[0]
+        if not re.search("\\s+TEMPLATE\\s+", line):
+            return text
         sf = SnippetFormatter()
         try:
             return [s + '\n' for s in sf.format(''.join(text), **macros).split('\n')][:-1]

@@ -24,13 +24,14 @@ for now we have here a sample that shows some fields.
 
 [//]: # (USE SNIPPET test/MyClass.java/fields)
 ```java
+    // VERSION="3.12"
     // FIELDS
     private boolean b; // constructor
     static Boolean bObj; // setter getter
     byte by; //package setter package getter
     Object obj; // package getter
     Integer iObj; // no builder
-    int i;
+    int i; // 3.12
     long l;
     Long lObj;
     char c;
