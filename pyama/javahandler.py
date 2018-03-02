@@ -9,7 +9,7 @@ space = re.compile("\\s+|=|;")
 
 
 class JavaHandler(SegmentHandler):
-    start_line = '//\\s*(?:FIELDS|CONSTRUCTOR|GETTERS|SETTERS|EQUALS|TOSTRING)'
+    start_line = '//\\s*(?:FIELDS|CONSTRUCTOR|GETTERS|SETTERS|EQUALS|TOSTRING|BUILDER)'
 
     def __init__(self):
         self.fields = []
@@ -49,11 +49,15 @@ class JavaHandler(SegmentHandler):
         if re.search('//\\s*TOSTRING', startline):
             self.handle_tostring(segment)
             return
+        if re.search('//\\s*BUILDER', startline):
+            self.handle_builder(segment)
+            return
         self.handle_general_segment(segment)
         return
 
     def handle_general_segment(self, segment):
         if segment.name == "0":
+            # we start a new file, forget classes we have already managed
             self.classname = None
         if self.classname is None:
             for line in segment.text:
@@ -270,6 +274,37 @@ class JavaHandler(SegmentHandler):
         segment.text = [segment.text[0]] + text + [segment.text[-1]]
         segment.modified = True
 
+    def handle_builder(self, segment):
+        line = segment.text[1]
+        match = re.search("class\\s+(\\w[\\w\\d_]*)", line)
+        if match:
+            builder_classname = match.group(1)
+            text = [line]
+        else:
+            builder_classname = "Builder"
+            text = ["    public static class Builder {\n"]
+
+        text.append("        private %s(){}\n" % builder_classname)
+        text.append("        final %s built = new %s();\n" % (self.classname, self.classname))
+        text.append("        public %s build(){\n" % builder_classname)
+        text.append("            final %s r = built;\n" % self.classname)
+        text.append("            built = null;\n")
+        text.append("            return r;\n")
+        text.append("        }\n")
+
+        for var in self.fields:
+            if not var.need_builder():
+                continue
+            text.append(
+                "        public %s %s(final %s %s){\n            built.%s = %s;\n            return this;\n        }\n" %
+                (builder_classname, var.buildername(), var.type, var.name, var.name, var.name))
+
+        text.append("    public static %s builder(){\n        return new %s();\n    }\n" %
+                    (builder_classname, builder_classname))
+
+        segment.text = [segment.text[0]] + text + [segment.text[-1]]
+        segment.modified = True
+
 
 class Var:
     def __init__(self, line):
@@ -302,7 +337,13 @@ class Var:
             self.getter_forced = True
         if re.search(".*//.*constructor", line):
             self.constructor_forced = True
-
+        match = re.search('.*//\\s*builder\\s+method\\s+"(.*)"', line)
+        if match:
+            self.builder_name = match.group(1)
+        else:
+            self.builder_name = None
+        self.builder_forced = re.search('.*//\\s*builder', line)
+        self.builder_forbidden =  not not re.search('.*//\\s*no\\s*builder', line)
         for tag in space.split(line):
             if tag == "final":
                 self.final = True
@@ -329,6 +370,11 @@ class Var:
                     # name is the last element we care, if there is init expression we ignore
                     break
 
+    def buildername(self):
+        if self.builder_name:
+            return self.builder_name
+        return "with" + self.name[:1].upper() + self.name[1:]
+
     def getter_name(self):
         prefix = "is" if self.type in ["boolean", "Boolean"] else "get"
         return prefix + self.name[:1].upper() + self.name[1:]
@@ -350,3 +396,8 @@ class Var:
 
     def need_equals(self):
         return not self.static
+
+    def need_builder(self):
+        if self.builder_forbidden:
+            return False
+        return (self.builder_forced) or (not self.static and not self.final and not self.assigned)

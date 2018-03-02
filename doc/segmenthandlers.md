@@ -248,7 +248,7 @@ to `True`.
         if not text:
             return
         if len(segment.text) < 2:
-            logger.warning("segment %s/%s is too short, can not be processed" % (segment.filename,segment.name))
+            logger.warning("segment %s/%s is too short, can not be processed" % (segment.filename, segment.name))
         else:
             segment.text = [segment.text[0], segment.text[1]] + \
                            text[1:-1] + \
