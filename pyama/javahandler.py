@@ -3,7 +3,7 @@ from pyama.file import Segment
 import re
 import logging
 
-LOGGER = logging.getLogger("pyama.javahandler.JavaHandler")
+logger = logging.getLogger("pyama.javahandler.JavaHandler")
 
 space = re.compile("\\s+|=|;")
 
@@ -55,7 +55,7 @@ class JavaHandler(SegmentHandler):
     def handle_general_segment(self, segment):
         if segment.name == "0":
             self.classname = None
-        if self.classname is not None:
+        if self.classname is None:
             for line in segment.text:
                 match = re.search("class\\s+(\\w[\\w\\d_]*)", line)
                 if match:
@@ -72,25 +72,25 @@ class JavaHandler(SegmentHandler):
     def handle_constructor(self, segment):
         const_head = segment.text[1]
         match = re.search("(.*)\\(.*\\)(.*)", const_head)
-        if match:
-            const_head = match.group(1) + "("
-            sep = ""
-            for var in self.fields:
-                if var.need_constructor():
-                    const_head += sep + "final " + var.type + " " + var.name
-                    sep = ", "
-            const_head += ")" + match.group(2) + "\n"
-
-        else:
-            LOGGER.error("The line '%s' can not be processed as constructor head")
+        if not match:
+            logger.info("%s does not have constructor, generaing a public one" % self.classname)
+            const_head = "    public %s(){" % self.classname
+            match = re.search("(.*)\\(.*\\)(.*)", const_head)
+        const_head = match.group(1) + "("
+        sep = ""
+        for var in self.fields:
+            if var.need_constructor():
+                const_head += sep + "final " + var.type + " " + var.name
+                sep = ", "
+        const_head += ")" + match.group(2) + "\n"
         text = []
         for var in self.fields:
             if var.need_constructor():
                 text.append("        this.%s = %s;\n" % (var.name, var.name))
-
+        text.append("    }\n")
         segment.text = [segment.text[0], const_head] + \
                        text + \
-                       segment.text[len(segment.text) - 2:len(segment.text)]
+                       segment.text[len(segment.text) - 1:len(segment.text)]
         segment.modified = True
 
     def handle_getters(self, segment):
@@ -118,26 +118,23 @@ class JavaHandler(SegmentHandler):
     def handle_equals(self, segment):
         line = segment.text[0]
         with_getters = re.search("with\\s+getters", line)
+        allow_subclass = re.search("allow\\s+subclass", line)
         if re.search("simple", line):
-            self.handle_simple_equals_and_hash_code(segment, with_getters)
+            self.handle_simple_equals_and_hash_code(segment, with_getters, allow_subclass)
             return
         if re.search("Objects", line):
-            self.handle_objects_equals_and_hash_code(segment, with_getters)
+            self.handle_objects_equals_and_hash_code(segment, with_getters, allow_subclass)
             return
-        self.handle_simple_equals_and_hash_code(segment, with_getters)
+        self.handle_objects_equals_and_hash_code(segment, with_getters, allow_subclass)
 
-    def handle_simple_equals_and_hash_code(self, segment, with_getters):
-        line = segment.text[0]
-        allow_subclass = re.search("allow\\s+subclass", line)
+    def handle_simple_equals_and_hash_code(self, segment, with_getters, allow_subclass):
         text = []
         self.generate_simple_equals(text, allow_subclass, with_getters)
         self.generate_simple_hash_code(text, with_getters)
         segment.text = [segment.text[0]] + text + [segment.text[-1]]
         segment.modified = True
 
-    def handle_objects_equals_and_hash_code(self, segment, with_getters):
-        line = segment.text[0]
-        allow_subclass = re.search("allow\\s+subclass", line)
+    def handle_objects_equals_and_hash_code(self, segment, with_getters, allow_subclass):
         text = []
         self.generate_objects_equals(text, allow_subclass, with_getters)
         self.generate_objects_hash_code(text, with_getters)
@@ -261,9 +258,11 @@ class JavaHandler(SegmentHandler):
     public String toString() {
         final StringBuilder sb = new StringBuilder("%s{");
 """ % self.classname)
+        sep = ""
         for var in self.fields:
             variable_name = var.getter_name() + "()" if with_getters else var.name
-            text.append('        sb.append("%s=").append(%s);\n' % (variable_name, variable_name))
+            text.append('        sb.append("%s%s=").append(%s);\n' % (sep, variable_name, variable_name))
+            sep = ","
         text.append("""        sb.append('}');
         return sb.toString();
     }
@@ -273,7 +272,7 @@ class JavaHandler(SegmentHandler):
 
 
 class Var:
-    def __init__(self,line):
+    def __init__(self, line):
         self.access = "package"
         self.type = None
         self.name = None
