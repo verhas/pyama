@@ -24,27 +24,27 @@ public class MyClass implements ScriptBasic {
 // START SNIPPET fields
     // FIELDS
     private boolean b; // constructor
-    static Boolean B; // setter getter
+    static Boolean bObj; // setter getter
     byte by; //package setter package getter
-    Object Obj; // package getter
-    Integer I;
+    Object obj; // package getter
+    Integer iObj;
     int i;
     long l;
-    Long L;
+    Long lObj;
     char c;
-    Character C;
+    Character cObj;
     float f;
-    Float F;
+    Float fObj;
     short s;
-    Short S;
-    Double D;
+    Short sObj;
+    Double dObj;
     final double d;
     // END
 // END SNIPPET
 
 // START SNIPPET constructor
     // CONSTRUCTOR
-    public MyClass(final boolean b, final double d) {
+    Susu(final boolean b, final double d){
         this.b = b;
         this.d = d;
     }
@@ -56,17 +56,17 @@ public class MyClass implements ScriptBasic {
     public boolean isB(){
         return this.b;
     }
-    public Boolean isB(){
-        return this.B;
+    public Boolean isBObj(){
+        return this.bObj;
     }
     byte getBy(){
         return this.by;
     }
     Object getObj(){
-        return this.Obj;
+        return this.obj;
     }
-    public Integer getI(){
-        return this.I;
+    public Integer getIObj(){
+        return this.iObj;
     }
     public int getI(){
         return this.i;
@@ -74,29 +74,29 @@ public class MyClass implements ScriptBasic {
     public long getL(){
         return this.l;
     }
-    public Long getL(){
-        return this.L;
+    public Long getLObj(){
+        return this.lObj;
     }
     public char getC(){
         return this.c;
     }
-    public Character getC(){
-        return this.C;
+    public Character getCObj(){
+        return this.cObj;
     }
     public float getF(){
         return this.f;
     }
-    public Float getF(){
-        return this.F;
+    public Float getFObj(){
+        return this.fObj;
     }
     public short getS(){
         return this.s;
     }
-    public Short getS(){
-        return this.S;
+    public Short getSObj(){
+        return this.sObj;
     }
-    public Double getD(){
-        return this.D;
+    public Double getDObj(){
+        return this.dObj;
     }
     public double getD(){
         return this.d;
@@ -109,8 +109,8 @@ public class MyClass implements ScriptBasic {
     public void setB(final boolean b){
         this.b = b;
     }
-    public void setB(final Boolean B){
-        this.B = B;
+    public void setBObj(final Boolean bObj){
+        this.bObj = bObj;
     }
     void setBy(final byte by){
         this.by = by;
@@ -124,28 +124,28 @@ public class MyClass implements ScriptBasic {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;        
 
-        None other = (None) o;
+        MyClass other = (MyClass) o;
 
         if ( b != other.b ) return false;
         if ( by != other.by ) return false;
-        if ( !Objects.equals(Obj,other.Obj) ) return false;
-        if ( !Objects.equals(I,other.I) ) return false;
+        if ( !Objects.equals(obj,other.obj) ) return false;
+        if ( !Objects.equals(iObj,other.iObj) ) return false;
         if ( i != other.i ) return false;
         if ( l != other.l ) return false;
-        if ( !Objects.equals(L,other.L) ) return false;
+        if ( !Objects.equals(lObj,other.lObj) ) return false;
         if ( c != other.c ) return false;
-        if ( !Objects.equals(C,other.C) ) return false;
+        if ( !Objects.equals(cObj,other.cObj) ) return false;
         if (Float.compare(other.f, f) != 0) return false;
-        if ( !Objects.equals(F,other.F) ) return false;
+        if ( !Objects.equals(fObj,other.fObj) ) return false;
         if ( s != other.s ) return false;
-        if ( !Objects.equals(S,other.S) ) return false;
-        if ( !Objects.equals(D,other.D) ) return false;
+        if ( !Objects.equals(sObj,other.sObj) ) return false;
+        if ( !Objects.equals(dObj,other.dObj) ) return false;
         if (Double.compare(other.d, d) != 0) return false;
         return true;
     }
     @Override
     public int hashCode() {
-        return Objects.hash(b, by, Obj, I, i, l, L, c, C, f, F, s, S, D, d);
+        return Objects.hash(b, by, obj, iObj, i, l, lObj, c, cObj, f, fObj, s, sObj, dObj, d);
     }
     // END
 //END SNIPPET
@@ -154,23 +154,23 @@ public class MyClass implements ScriptBasic {
     // TOSTRING with getters
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("None{");
+        final StringBuilder sb = new StringBuilder("MyClass{");
         sb.append("isB()=").append(isB());
-        sb.append("isB()=").append(isB());
-        sb.append("getBy()=").append(getBy());
-        sb.append("getObj()=").append(getObj());
-        sb.append("getI()=").append(getI());
-        sb.append("getI()=").append(getI());
-        sb.append("getL()=").append(getL());
-        sb.append("getL()=").append(getL());
-        sb.append("getC()=").append(getC());
-        sb.append("getC()=").append(getC());
-        sb.append("getF()=").append(getF());
-        sb.append("getF()=").append(getF());
-        sb.append("getS()=").append(getS());
-        sb.append("getS()=").append(getS());
-        sb.append("getD()=").append(getD());
-        sb.append("getD()=").append(getD());
+        sb.append(",isBObj()=").append(isBObj());
+        sb.append(",getBy()=").append(getBy());
+        sb.append(",getObj()=").append(getObj());
+        sb.append(",getIObj()=").append(getIObj());
+        sb.append(",getI()=").append(getI());
+        sb.append(",getL()=").append(getL());
+        sb.append(",getLObj()=").append(getLObj());
+        sb.append(",getC()=").append(getC());
+        sb.append(",getCObj()=").append(getCObj());
+        sb.append(",getF()=").append(getF());
+        sb.append(",getFObj()=").append(getFObj());
+        sb.append(",getS()=").append(getS());
+        sb.append(",getSObj()=").append(getSObj());
+        sb.append(",getDObj()=").append(getDObj());
+        sb.append(",getD()=").append(getD());
         sb.append('}');
         return sb.toString();
     }
