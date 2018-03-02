@@ -112,7 +112,7 @@ it as something it could process.)
 ## Command line options
 
 ```bash
-usage: run.py [-h] [-l LEVEL] [-d] [-b]
+usage: run.py [-h] [-l LEVEL] [-d] [-b] [-f LOGFILE]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -121,6 +121,8 @@ optional arguments:
                         ERROR or CRITICAL
   -d, --dry             do not write the changes back to the files
   -b, --backup          create .BAK for changed files
+  -f LOGFILE, --logfile LOGFILE
+                        create .BAK for changed files
 ```
 
 (This is copied here with manual labour until we will have a handler that can run external program
