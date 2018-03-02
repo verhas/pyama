@@ -15,7 +15,7 @@ will collect all the information that it needs later to modify the segments that
 placeholders for getters, setters and so on.
 
 The listing of the fields should start with a line that contains the string `FIELDS`. This
-usually is a comment line like in the sample belov.
+usually is a comment line like in the sample below.
 
 The fields have to listed on separate lines, as we usually do when we program on Java.
 There can be comments following the field declaration on the same line to control the
@@ -29,12 +29,12 @@ for now we have here a sample that shows some fields.
     static Boolean bObj; // setter getter
     byte by; //package setter package getter
     Object obj; // package getter
-    Integer iObj;
+    Integer iObj; // no builder
     int i;
     long l;
     Long lObj;
     char c;
-    Character cObj;
+    Character cObj;  // builder method "separator"
     float f;
     Float fObj;
     short s;
@@ -75,7 +75,7 @@ then it will use that line replacing the part between the parentheses with the n
 [//]: # (USE SNIPPET test/MyClass.java/constructor)
 ```java
     // CONSTRUCTOR
-    Susu(final boolean b, final double d){
+    public MyClass(final boolean b, final double d){
         this.b = b;
         this.d = d;
     }
@@ -293,3 +293,98 @@ is found on the segment starting line.
     // END
 ```
 
+## BUILDER
+
+The "builder" segment starts with a line containing `BUILDER` and ends with a line containing
+`END`. This segment is overwritten by the handler.
+
+Pyama generates a `public static class` in this segment that is a builder for the surrounding class. If you edit
+this line and change the visibility of the class, and the line remains the first line of the segment then
+Pyama will respect your change. You can also change the name of the builder class after you generated the
+code the first time and Pyama will use the changed name.
+
+Pyama also generates a `public static` method named `builder()` that returns a new instance of the builder
+and in the builder class it will generate methods for each field that has to be included in the builder.
+A field has to be included in the builder if it is not `static`, not `final` and did not get value assigned
+on the line of the declaration. If any of these is true the field will be excluded from the builder. This
+algorithm can be overridden with a comment following the field that say `// no builder` to exclude the field
+from the builder no matter what or with a comment that says `// builder` to include the field in the builder.
+(The `//no builder` is the stronger.)
+
+The builder methods return `this` thus they can be chained. The name of the builder method is `withXxxx` where
+`Xxxx` is the name of the field capitalized. You can override this naming specifying a name for the builder method
+using the comment on the line of the field declaration that says 
+`// builder method "methodname"`. This also forces the field to be included in the 
+builder. The name of the method has to be between double quotes.
+
+[//]: # (USE SNIPPET test/MyClass.java/builder)
+```java
+    // BUILDER
+    public static class MyBuilder {
+        private MyBuilder(){}
+        final MyClass built = new MyClass();
+        public MyBuilder build(){
+            final MyClass r = built;
+            built = null;
+            return r;
+        }
+        public MyBuilder withB(final boolean b){
+            built.b = b;
+            return this;
+        }
+        public MyBuilder withBy(final byte by){
+            built.by = by;
+            return this;
+        }
+        public MyBuilder withObj(final Object obj){
+            built.obj = obj;
+            return this;
+        }
+        public MyBuilder withI(final int i){
+            built.i = i;
+            return this;
+        }
+        public MyBuilder withL(final long l){
+            built.l = l;
+            return this;
+        }
+        public MyBuilder withLObj(final Long lObj){
+            built.lObj = lObj;
+            return this;
+        }
+        public MyBuilder withC(final char c){
+            built.c = c;
+            return this;
+        }
+        public MyBuilder separator(final Character cObj){
+            built.cObj = cObj;
+            return this;
+        }
+        public MyBuilder withF(final float f){
+            built.f = f;
+            return this;
+        }
+        public MyBuilder withFObj(final Float fObj){
+            built.fObj = fObj;
+            return this;
+        }
+        public MyBuilder withS(final short s){
+            built.s = s;
+            return this;
+        }
+        public MyBuilder withSObj(final Short sObj){
+            built.sObj = sObj;
+            return this;
+        }
+        public MyBuilder withDObj(final Double dObj){
+            built.dObj = dObj;
+            return this;
+        }
+    public static MyBuilder builder(){
+        return new MyBuilder();
+    }
+    //END
+```
+
+The current implementation does not support optional and mandatory builder parameters
+and you also can not enforce any ordering.

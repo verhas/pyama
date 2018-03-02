@@ -20,19 +20,19 @@ import java.util.Map;
  * This is a Javadoc
  *
  */
-public class MyClass implements ScriptBasic {
+public class MyClass {
 // START SNIPPET fields
     // FIELDS
     private boolean b; // constructor
     static Boolean bObj; // setter getter
     byte by; //package setter package getter
     Object obj; // package getter
-    Integer iObj;
+    Integer iObj; // no builder
     int i;
     long l;
     Long lObj;
     char c;
-    Character cObj;
+    Character cObj;  // builder method "separator"
     float f;
     Float fObj;
     short s;
@@ -42,9 +42,77 @@ public class MyClass implements ScriptBasic {
     // END
 // END SNIPPET
 
+// START SNIPPET builder
+    // BUILDER
+    public static class MyBuilder {
+        private MyBuilder(){}
+        final MyClass built = new MyClass();
+        public MyBuilder build(){
+            final MyClass r = built;
+            built = null;
+            return r;
+        }
+        public MyBuilder withB(final boolean b){
+            built.b = b;
+            return this;
+        }
+        public MyBuilder withBy(final byte by){
+            built.by = by;
+            return this;
+        }
+        public MyBuilder withObj(final Object obj){
+            built.obj = obj;
+            return this;
+        }
+        public MyBuilder withI(final int i){
+            built.i = i;
+            return this;
+        }
+        public MyBuilder withL(final long l){
+            built.l = l;
+            return this;
+        }
+        public MyBuilder withLObj(final Long lObj){
+            built.lObj = lObj;
+            return this;
+        }
+        public MyBuilder withC(final char c){
+            built.c = c;
+            return this;
+        }
+        public MyBuilder separator(final Character cObj){
+            built.cObj = cObj;
+            return this;
+        }
+        public MyBuilder withF(final float f){
+            built.f = f;
+            return this;
+        }
+        public MyBuilder withFObj(final Float fObj){
+            built.fObj = fObj;
+            return this;
+        }
+        public MyBuilder withS(final short s){
+            built.s = s;
+            return this;
+        }
+        public MyBuilder withSObj(final Short sObj){
+            built.sObj = sObj;
+            return this;
+        }
+        public MyBuilder withDObj(final Double dObj){
+            built.dObj = dObj;
+            return this;
+        }
+    public static MyBuilder builder(){
+        return new MyBuilder();
+    }
+    //END
+// END SNIPPET
+
 // START SNIPPET constructor
     // CONSTRUCTOR
-    Susu(final boolean b, final double d){
+    public MyClass(final boolean b, final double d){
         this.b = b;
         this.d = d;
     }
