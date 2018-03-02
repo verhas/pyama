@@ -81,10 +81,10 @@ class SnippetWriter(SegmentHandler):
             text = self.find_joker_snippet(snippet)
         else:
             text = file in snippets and snippet in snippets[file] and snippets[file][snippet]
-            if not text:
-                logger.warning("snippet %s/%s is not defined" % (file, snippet))
-                return False
-            logger.debug("snippet %s/%s is %s" % (file, snippet, text))
+        if not text:
+            logger.warning("snippet %s/%s is not defined" % (file, snippet))
+            return False
+        logger.debug("snippet %s/%s is %s" % (file, snippet, text))
         return self.processed(text)
 
     def processed(self, text):
