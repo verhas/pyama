@@ -2,8 +2,10 @@ from pyama.segmenthandler import SegmentHandler
 from pyama.file import Segment
 import re
 import logging
+from pyama.template import SnippetFormatter
 
 snippets = {}
+macros = {}
 
 logger = logging.getLogger(__name__)
 
@@ -72,8 +74,16 @@ class SnippetWriter(SegmentHandler):
             text = file in snippets and snippet in snippets[file] and snippets[file][snippet]
             if not text:
                 logger.warning("snippet %s/%s is not defined" % (file, snippet))
+                return False
             logger.debug("snippet %s/%s is %s" % (file, snippet, text))
-        return text
+        return self.processed(text)
+
+    def processed(self, text):
+        sf = SnippetFormatter()
+        try:
+            return [s + '\n' for s in sf.format(''.join(text), **macros).split('\n')][:-1]
+        except:
+            return text
 
     def find_joker_snippet(self, snippet):
         found_nr = 0
@@ -128,7 +138,7 @@ class MdSnippetWriter(SnippetWriter):
         if not text:
             return
         if len(segment.text) < 2:
-            logger.warning("segment %s/%s is too short, can not be processed" % (segment.filename,segment.name))
+            logger.warning("segment %s/%s is too short, can not be processed" % (segment.filename, segment.name))
         else:
             segment.text = [segment.text[0], segment.text[1]] + \
                            text[1:-1] + \
