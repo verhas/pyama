@@ -55,9 +55,11 @@ be executed many times.
 Because snippet names are usually unique and files tend to be moved between directories during
 development it is a burden to specify the file most of the time.
 The snippet handler allows you to use `*` in place of the file name. In that case
-if there is anywhere a snippet with the given name it will be used. Note, however, that
-snippet handler will not care if you have more than one snippets with the same name.
-It will use the one it finds first.
+if there is anywhere a snippet with the given name it will be used. If there are more than one
+snippets with that name then the snippet handler will concatenate them.
+
+Another shorthand is to use a `.` (dot) as file name. In that case we refer to the named
+snippet defined in the same file.
 
 When the snippet is copied the first and the last lines of the copied snippet are 
 not copied. That way, for example, using the example snippet `main_java` the code
@@ -137,7 +139,7 @@ it is documented in detail on the web page
 
 ### Template snippet
 
-To signal that a snippet has to be used as a template and the macros have to be resolved
+To signal that a snippet should be used as a template and the macros should be resolved
 the SNIPPET START line should contain the word `TEMPLATE`, reasonably following the name 
 of the snippet.
 
