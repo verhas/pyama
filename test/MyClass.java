@@ -22,7 +22,9 @@ import java.util.Map;
  */
 public class MyClass {
 // START SNIPPET fields TEMPLATE MATCH (\w[\w\d_]*)\s*=\s*"(.*?)"
-    // VERSION="3.12"
+    // MATCH (\w*)="(.*)"
+    // VERSION="3.13";
+    // NO MATCH
     // FIELDS
     private boolean b; // constructor
     static Boolean bObj; // setter getter

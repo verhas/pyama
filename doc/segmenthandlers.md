@@ -208,7 +208,7 @@ classes `SnippetWriter` and the class `MdSnippetWriter`.
         match = re.search(SnippetWriter.start_line, startline)
         if not match:
             return
-        text = self._get_modified_text(match.group(2))
+        text = self._get_modified_text(match.group(2), segment)
         if not text:
             return
         segment.text = [segment.text[0]] + text[1:-1] + [segment.text[-1]]
@@ -244,7 +244,7 @@ to `True`.
         match = re.search(SnippetWriter.start_line, startline)
         if not match:
             return
-        text = self._get_modified_text(match.group(2))
+        text = self._get_modified_text(match.group(2), segment)
         if not text:
             return
         if len(segment.text) < 2:

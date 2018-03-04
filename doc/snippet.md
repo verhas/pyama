@@ -71,7 +71,13 @@ copied into the documentation will only be the  printing line:
 When using the markdown handler the the copy process takes care of the code starting
 three back-tick and the code ending three back-ticks. In this case the three back-ticks
 on the line also used to signal the end of the lines to where the snippet is copied,
-therefore there is no need to use `END SNIPPET` line.
+therefore there is no need to use `END SNIPPET` line. In some cases you may want to insert
+a snippet that does not go into a verbatim code segment. In these cases you can use the
+`END SNIPPET` string probbaly in the form of 
+
+```markdown
+[//]: # (END SNIPPET)
+```
 
 Note, however, that the starting back-ticks SHOULD be followed by the syntax type to
 help pyaman to distinguish it from the snippet ending. For examples, please
@@ -96,6 +102,91 @@ HTML format. If that bothers you then you can use the empty link structure:
 
 which will not even get into the HTML output of the markdown conversion.
 
+## Macro resolution
+
+There is a class `SnippetMacro` in the `snippet` package that can help to use template files
+that contain macros. Macros are placeholders in snippets between `{` and `}` characters.
+The simplest macros are just identifiers. `SnippetMacro` maintains a dictionary that
+assigns value to the identifiers and when a template snippet is used these macros
+are replaced by the assigned value.
+
+### Template format
+
+The templating supports more complex macros. If the identifier is followed by a
+colon and a special keyword then the assigned value is evaluated in a different way. The
+keywords supported are
+
+* `repeat` will repeat the text following the colon followed by the keyword for each element
+of the assigned value in case it is iterable or a dictionary. It is not possible to have
+such values using the snippet macros. This possibility is there for extra segment
+handlers that may want to put such value into the dictionary.
+
+* `call` will invoke the value if it is callable. It is not possible to have
+such values using the snippet macros. This possibility is there for extra segment
+handlers that may want to put such value into the dictionary.
+
+* `if` will include tthe text following the colon followed by the keyword if the value 
+evaluates `True`
+
+* `ifnot` will include tthe text following the colon followed by the keyword if the value 
+evaluates `False`. (For example empty string.)
+
+The templating engine is implemented in the file `pyama/template.py`. It is 24 lines and
+it is documented in detail on the web page
+[The world's simplest Python template engine](https://makina-corpus.com/blog/metier/2016/the-worlds-simplest-python-template-engine).
+
+### Template snippet
+
+To signal that a snippet has to be used as a template and the macros have to be resolved
+the SNIPPET START line should contain the word `TEMPLATE`, reasonably following the name 
+of the snippet.
+
+When the macro resolution runs it is an error if some of the macros are not defined. In this case
+the text of the snippet is copied verbatim to the segment where it is used and pyama will log
+a warning, also giving information about the first key that it did not find.
+
+### Defining values
+
+There are two ways to define parameters for the templates. One is to configure `SnippetMacro`
+to run as segment handler and collect key/value pairs from the files it processes. `SnippetMacro`
+itself does not define any segment start and end pattern, but it processes all lines of the
+segments and collects the key/values. If it finds a line that looks `MATCH regex` then it
+starts to use the `regex` to match the following lines.
+
+The regular expression should have exactly two capturing groups. The first one will be used
+as the key and the second as the value when a line matches.
+
+The matching process ends at the end of each file or when a line containing the string`NO MATCH`
+is found. In a java file you can have something like
+
+```java
+// MATCH \s+(\w+)\s*=\s*(\d+) 
+public static final int VERSION=5
+// NO MATCH
+```
+
+This will put the value `5` into the global macro dictionary with the key `VERSION`.
+A template snippet may reference the version in the following passes as `{VERSION}`. 
+
+The other is to use the keyword `WITH`
+following the `USE SNIPPET` and the snippet reference. The `WITH` keyword has to be followed
+by space separated key/value definitions. For example
+
+```markdown
+USE SNIPPET ./xetters WITH xetters="setters" xetter="setter" XETTERS="SETTERS" and_not_final=" and not `final`"
+``` 
+
+The format of the key/value definition is `key="string value"`. Currently you can not
+define a value that contains the `"` character.
+
+The values defined this way will be used when resolving the template snippet only at the
+very one use where the parameters are defined. They may shadow globally defined keys
+assigning different values to them, but they do not overwrite them.
+
+To see a real life example of such template use have a look at the documentation source of
+`javahandler.md` that has almost identical documenation for setters and getters and instead of
+copy/pasteing the documentation templating is used.
+
 ## Configuration
 
 To use the snippet handler you can configure it as you can see in `run.py` in 
@@ -116,12 +207,12 @@ those file segments that belong to files they are configured for.
 [//]: # (USE SNIPPET run.py/run_py)
 ```python
 from pyama.configuration import Configuration
-from pyama.snippet import MdSnippetWriter, SnippetReader
+from pyama.snippet import MdSnippetWriter, SnippetReader, SnippetMacro
 from pyama.processor import Processor
 
 MD = Configuration().file(".*\\.md$").handler(MdSnippetWriter(),SnippetReader())
 PY = Configuration().file(".*\\.py$").handler(SnippetReader())
-JAVA = Configuration().file(".*\\.java$").handler(SnippetReader())
+JAVA = Configuration().file(".*\\.java$").handler(SnippetReader(),SnippetMacro())
 configs = [MD, PY, JAVA]
 
 Processor(configs, "**/*.*").process()

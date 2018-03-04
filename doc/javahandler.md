@@ -24,14 +24,16 @@ for now we have here a sample that shows some fields.
 
 [//]: # (USE SNIPPET test/MyClass.java/fields)
 ```java
-    // VERSION="3.12"
+    // MATCH (\w*)="(.*)"
+    // VERSION="3.13";
+    // NO MATCH
     // FIELDS
     private boolean b; // constructor
     static Boolean bObj; // setter getter
     byte by; //package setter package getter
     Object obj; // package getter
     Integer iObj; // no builder
-    int i; // 3.12
+    int i; // 3.13
     long l;
     Long lObj;
     char c;
@@ -92,6 +94,24 @@ awkward but will also prevent this handler to know the name of the class
 The above sample shows the generated constructor for the fields as listed above. 
 
 ## GETTERS
+<!-- START SNIPPET xetters TEMPLATE
+The {xetters} segment starts with a line containing `{XETTERS}` and ends with a line containing
+`END`. This segment is overwritten by the handler.
+
+By default pyama will generate {xetters} for those fields that are `private` and not `static`{and_not_final}.
+If the segment starting comment contains the string `for all` then pyama will generate {xetters}
+for all the fields.
+
+It is also possible to force individual fields to get {xetter} in the generated code. If the
+comment following the field contains `{xetter}` then it will get a {xetter}.
+
+If the comment contains `protected {xetter}` then the {xetter} will have `protected` access modifier.
+If the comment contains `package {xetter}` then the {xetter} will have no access modifier and as such
+it will be package private.
+
+END SNIPPET -->
+
+[//]: # (USE SNIPPET ./xetters WITH xetters="getters" xetter="getter" XETTERS="GETTERS" and_not_final="")
 
 The getters segment starts with a line containing `GETTERS` and ends with a line containing
 `END`. This segment is overwritten by the handler.
@@ -100,12 +120,14 @@ By default pyama will generate getters for those fields that are `private` and n
 If the segment starting comment contains the string `for all` then pyama will generate getters
 for all the fields.
 
-It is also possible to force individual fields to get getters in the generated code. If the
+It is also possible to force individual fields to get getter in the generated code. If the
 comment following the field contains `getter` then it will get a getter.
 
 If the comment contains `protected getter` then the getter will have `protected` access modifier.
 If the comment contains `package getter` then the getter will have no access modifier and as such
 it will be package private.
+
+[//]: # (END SNIPPET)
 
 For `boolean` and `Boolean` fields the name of the getter will be `isXxxx()`, for other fields
 it is `getXxxx()`.
@@ -166,19 +188,23 @@ it is `getXxxx()`.
 
 ## SETTERS
 
+[//]: # (USE SNIPPET ./xetters WITH xetters="setters" xetter="setter" XETTERS="SETTERS" and_not_final=" and not `final`")
+
 The setters segment starts with a line containing `SETTERS` and ends with a line containing
 `END`. This segment is overwritten by the handler.
 
-By default pyama will generate setters for those fields that are `private` and not `static`
-and not `final`. If the segment starting comment contains the string `for all` then pyama 
-will generate setters for all the fields.
+By default pyama will generate setters for those fields that are `private` and not `static` and not `final`.
+If the segment starting comment contains the string `for all` then pyama will generate setters
+for all the fields.
 
-It is also possible to force individual fields to get setters in the generated code. If the
+It is also possible to force individual fields to get setter in the generated code. If the
 comment following the field contains `setter` then it will get a setter.
 
 If the comment contains `protected setter` then the setter will have `protected` access modifier.
 If the comment contains `package setter` then the setter will have no access modifier and as such
 it will be package private.
+
+[//]: # (END SNIPPET)
 
 
 [//]: # (USE SNIPPET test/MyClass.java/setters)

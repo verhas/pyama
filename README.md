@@ -35,12 +35,12 @@ you can have some sample code like the following:
 [//]: # (USE SNIPPET run.py/run_py)
 ```python
 from pyama.configuration import Configuration
-from pyama.snippet import MdSnippetWriter, SnippetReader
+from pyama.snippet import MdSnippetWriter, SnippetReader, SnippetMacro
 from pyama.processor import Processor
 
 MD = Configuration().file(".*\\.md$").handler(MdSnippetWriter(),SnippetReader())
 PY = Configuration().file(".*\\.py$").handler(SnippetReader())
-JAVA = Configuration().file(".*\\.java$").handler(SnippetReader())
+JAVA = Configuration().file(".*\\.java$").handler(SnippetReader(),SnippetMacro())
 configs = [MD, PY, JAVA]
 
 Processor(configs, "**/*.*").process()
