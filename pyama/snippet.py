@@ -14,6 +14,7 @@ class SnippetMacro(SegmentHandler):
     def __init__(self):
         self.sf = SnippetFormatter()
         self.regex = None
+
     def set(self, key, value):
         macros[key] = value
 
@@ -98,16 +99,16 @@ class SnippetWriter(SegmentHandler):
     def end(self):
         return '//\\s*END\\s+SNIPPET'
 
-    def _get_modified_text(self, snippet_reference, segment):
+    def _get_modified_text(self, snippet_reference, segment, process=True):
         match = re.search("(.*)/(\\w[\\w\\d_]*)", snippet_reference)
         if not match:
             logger.warning("'%s' reference is not file/name format" % snippet_reference)
             return None
         file = match.group(1)
         snippet = match.group(2)
-        return self._get_snippet_text(file, snippet, segment)
+        return self._get_snippet_text(file, snippet, segment, process)
 
-    def _get_snippet_text(self, file, snippet, segment):
+    def _get_snippet_text(self, file, snippet, segment, process=True):
         if file == '*':
             text = self.find_joker_snippet(snippet)
         else:
@@ -118,7 +119,12 @@ class SnippetWriter(SegmentHandler):
             logger.warning("snippet %s/%s is not defined" % (file, snippet))
             return False
         logger.debug("snippet %s/%s is %s" % (file, snippet, text))
-        return self.processed(text, segment)
+        if process:
+            return self.processed(text, segment)
+        else:
+            if re.search("\\s+TEMPLATE\\s+",text[0]):
+                logger.warning("snippet was used as parameter, will not be processed as template: %s" % text[0][0:-1])
+            return text
 
     def processed(self, text, segment):
         line = text[0]
@@ -129,8 +135,7 @@ class SnippetWriter(SegmentHandler):
         line = segment.text[0]
         try:
             if re.search("\\s+WITH\\s+", line):
-                local = self.get_local_parameters(line)
-                match = re.search("\\s+WITH\\s+(.*)$", line)
+                local = self.get_local_parameters(line, segment)
                 return self.macro.format(text, local)
             return self.macro.format(text, {})
         except KeyError as ke:
@@ -139,15 +144,27 @@ class SnippetWriter(SegmentHandler):
             logger.warning("Key %s is missing" % ke)
             return text
 
-    def get_local_parameters(self, line):
+    def get_local_parameters(self, line, segment):
         local = {}
         match = re.search("\\s+WITH\\s+(.*)$", line)
         line = match.group(1)
         while len(line) > 0:
+            value_is_from_snippet = False
             match = re.search("(\\w[\\w\\d_]*)\\s*=\\s*\"(.*?)\"\\s*(.*)$", line)
+            if not match:
+                match = re.search("(\\w[\\w\\d_]*)\\s*=\\s*'(.*?)'\\s*(.*)$", line)
+            if not match:
+                match = re.search("(\\w[\\w\\d_]*)\\s*->\\s*(?:'|\")(.*?)(?:'|\")\\s*(.*)$", line)
+                value_is_from_snippet = True
             if match:
                 line = match.group(3)
-                local[match.group(1)] = match.group(2)
+                if value_is_from_snippet:
+                    text = self._get_modified_text(match.group(2), segment, process=False)
+                    text = self.chomp(text)
+                    value = "".join(text[1:-1])
+                else:
+                    value = match.group(2)
+                local[match.group(1)] = value
             else:
                 break
         return local
@@ -169,6 +186,19 @@ class SnippetWriter(SegmentHandler):
             logger.warning("used snippet %s is defined in multiple files" % snippet)
         return text
 
+    def chomp(self, text):
+        """remove the last \n if the segment is to be chomped"""
+        if not re.search("TRUNCATE", text[0]):
+            return text
+        if len(text) < 2:
+            logger.warning("segment %s is too short to trunace the last line " % text[0])
+        if text[-2][-1] == '\n' and text[-2][-2] == '\\':
+            chomped = [s for s in text]
+            chomped[-2] = chomped[-2][0:-2]
+            return chomped
+        else:
+            return text
+
     # START SNIPPET SnippetWriter_handle
     def handle(self, pass_nr, segment):
         startline = segment.text[0]
@@ -178,6 +208,7 @@ class SnippetWriter(SegmentHandler):
         text = self._get_modified_text(match.group(2), segment)
         if not text:
             return
+        text = self.chomp(text)
         segment.text = [segment.text[0]] + text[1:-1] + [segment.text[-1]]
         segment.modified = True
     # END SNIPPET
@@ -207,6 +238,7 @@ class MdSnippetWriter(SnippetWriter):
         if len(segment.text) < 2:
             logger.warning("segment %s/%s is too short, can not be processed" % (segment.filename, segment.name))
         else:
+            text = self.chomp(text)
             segment.text = [segment.text[0], segment.text[1]] + \
                            text[1:-1] + \
                            [segment.text[-1]]

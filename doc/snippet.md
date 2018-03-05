@@ -85,6 +85,16 @@ Note, however, that the starting back-ticks SHOULD be followed by the syntax typ
 help pyaman to distinguish it from the snippet ending. For examples, please
 look at the raw display of the [README.md](../README.md) file.
 
+## TRUNCATE new line from segment
+
+In some cases you want a snippet, when used be part of a line. But segments start with
+a segment start line and they also end with a segment ending line and thus the last line
+is always terminated with a new line.
+
+If you use the keyword `TRUNCATE` in the starting line of the snippet and the last
+characters of the last line before the snippet terminating line are `\\n` (backslash
+and new line) then they will be removed when the snippet is used.   
+
 ## Markdown tips
 
 To insert the `USE SNIPPET` string into a line into the markdown documentation
@@ -178,8 +188,13 @@ by space separated key/value definitions. For example
 USE SNIPPET ./xetters WITH xetters="setters" xetter="setter" XETTERS="SETTERS" and_not_final=" and not `final`"
 ``` 
 
-The format of the key/value definition is `key="string value"`. Currently you can not
-define a value that contains the `"` character.
+The format of the key/value definition is `key="string value"`, or
+`key='string value'`.
+
+You can also define that a parameter should have the value of another snippet. That way
+you can insert a snippet into another snippet via a parameter. The format of of such
+reference is `key -> file/snippet_name`. The referenced snippet should not be a `TEMPLATE` snippet and if it is Pyama will issue
+a warning and the snippet will be processed as plain text without macro resolution. 
 
 The values defined this way will be used when resolving the template snippet only at the
 very one use where the parameters are defined. They may shadow globally defined keys

@@ -211,6 +211,7 @@ classes `SnippetWriter` and the class `MdSnippetWriter`.
         text = self._get_modified_text(match.group(2), segment)
         if not text:
             return
+        text = self.chomp(text)
         segment.text = [segment.text[0]] + text[1:-1] + [segment.text[-1]]
         segment.modified = True
 ```
@@ -250,6 +251,7 @@ to `True`.
         if len(segment.text) < 2:
             logger.warning("segment %s/%s is too short, can not be processed" % (segment.filename, segment.name))
         else:
+            text = self.chomp(text)
             segment.text = [segment.text[0], segment.text[1]] + \
                            text[1:-1] + \
                            [segment.text[-1]]

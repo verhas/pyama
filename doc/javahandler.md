@@ -188,7 +188,11 @@ it is `getXxxx()`.
 
 ## SETTERS
 
-[//]: # (USE SNIPPET ./xetters WITH xetters="setters" xetter="setter" XETTERS="SETTERS" and_not_final=" and not `final`")
+<!-- START SNIPPET and_not_final TRUNCATE
+ and not `final`\
+END SNIPPET -->
+
+[//]: # (USE SNIPPET ./xetters WITH xetters="setters" xetter="setter" XETTERS="SETTERS" and_not_final->'./and_not_final' )
 
 The setters segment starts with a line containing `SETTERS` and ends with a line containing
 `END`. This segment is overwritten by the handler.
