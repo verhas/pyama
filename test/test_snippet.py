@@ -20,7 +20,7 @@ class TestSnippets(unittest.TestCase):
 
     def test_complex_templating(self):
         TEST = "template_complex"
-        copy_template(TEST,template_ext=".tmpl_x")
+        copy_template(TEST, template_ext=".tmpl_x")
         TXT = Configuration() \
             .file(TARGET + TEST + ".txt") \
             .handler(SnippetReader(), SnippetWriter(), SnippetMacro())
@@ -28,6 +28,10 @@ class TestSnippets(unittest.TestCase):
         processor = Processor(configs, TARGET + TEST + ".txt")
         macro = SnippetMacro()
         macro.set("name", "Peter Verhas")
+        macro.set("list", ["A", "B", "C"])
+        macro.set("yes", True)
+        macro.set("no", False)
+        macro.set("dict", {"a": "1", "b": 2, "c": 3})
         processor.process()
         assertEqual(TEST)
         snippetreset()
