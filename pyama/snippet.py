@@ -97,7 +97,7 @@ class SnippetWriter(SegmentHandler):
         return SnippetWriter.start_line
 
     def end(self):
-        return '//\\s*END\\s+SNIPPET'
+        return 'END\\s+SNIPPET'
 
     def _get_modified_text(self, snippet_reference, segment, process=True):
         match = re.search("(.*)/(\\w[\\w\\d_]*)", snippet_reference)
