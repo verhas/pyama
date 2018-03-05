@@ -75,7 +75,7 @@ three back-tick and the code ending three back-ticks. In this case the three bac
 on the line also used to signal the end of the lines to where the snippet is copied,
 therefore there is no need to use `END SNIPPET` line. In some cases you may want to insert
 a snippet that does not go into a verbatim code segment. In these cases you can use the
-`END SNIPPET` string probbaly in the form of 
+`END SNIPPET` string probably in the form of 
 
 ```markdown
 [//]: # (END SNIPPET)
@@ -99,7 +99,6 @@ using the `key->'file/snippet_name'` format. If a `TRUNCATE` snippet is used via
 `USE SNIPPET` then only the `\` (backslash) will be removes from before the new line.
 This is because if the new line was removed in such a use the updated segment would concatenate
 the terminating segment ending line and the last line.
-
 
 ## Markdown tips
 
@@ -143,7 +142,7 @@ handlers that may want to put such value into the dictionary.
 such values using the snippet macros. This possibility is there for extra segment
 handlers that may want to put such value into the dictionary.
 
-* `if` will include tthe text following the colon followed by the keyword if the value 
+* `if` will include the text following the colon followed by the keyword if the value 
 evaluates `True`
 
 * `ifnot` will include tthe text following the colon followed by the keyword if the value 
