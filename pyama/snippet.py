@@ -186,7 +186,7 @@ class SnippetWriter(SegmentHandler):
             logger.warning("used snippet %s is defined in multiple files" % snippet)
         return text
 
-    def chomp(self, text):
+    def chomp(self, text, inline=True):
         """remove the last \n if the segment is to be chomped"""
         if not re.search("TRUNCATE", text[0]):
             return text
@@ -194,7 +194,10 @@ class SnippetWriter(SegmentHandler):
             logger.warning("segment %s is too short to trunace the last line " % text[0])
         if text[-2][-1] == '\n' and text[-2][-2] == '\\':
             chomped = [s for s in text]
-            chomped[-2] = chomped[-2][0:-2]
+            if inline:
+                chomped[-2] = chomped[-2][0:-2]
+            else:
+                chomped[-2] = chomped[-2][0:-2] + '\n'
             return chomped
         else:
             return text
@@ -208,7 +211,7 @@ class SnippetWriter(SegmentHandler):
         text = self._get_modified_text(match.group(2), segment)
         if not text:
             return
-        text = self.chomp(text)
+        text = self.chomp(text,False)
         segment.text = [segment.text[0]] + text[1:-1] + [segment.text[-1]]
         segment.modified = True
     # END SNIPPET
@@ -238,7 +241,7 @@ class MdSnippetWriter(SnippetWriter):
         if len(segment.text) < 2:
             logger.warning("segment %s/%s is too short, can not be processed" % (segment.filename, segment.name))
         else:
-            text = self.chomp(text)
+            text = self.chomp(text,False)
             segment.text = [segment.text[0], segment.text[1]] + \
                            text[1:-1] + \
                            [segment.text[-1]]

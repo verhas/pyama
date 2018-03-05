@@ -93,7 +93,13 @@ is always terminated with a new line.
 
 If you use the keyword `TRUNCATE` in the starting line of the snippet and the last
 characters of the last line before the snippet terminating line are `\\n` (backslash
-and new line) then they will be removed when the snippet is used.   
+and new line) then they will be removed when the snippet is used. Note that this makes
+only sense for snippets that are solely used in other snippet when referenced
+using the `key->'file/snippet_name'` format. If a `TRUNCATE` snippet is used via
+`USE SNIPPET` then only the `\` (backslash) will be removes from before the new line.
+This is because if the new line was removed in such a use the updated segment would concatenate
+the terminating segment ending line and the last line.
+
 
 ## Markdown tips
 
