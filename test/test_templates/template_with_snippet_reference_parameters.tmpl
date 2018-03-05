@@ -1,0 +1,20 @@
+
+START SNIPPET first_snippet TEMPLATE
+this is the content of the first {snippet}
+it has multiple lines
+END SNIPPET
+
+This is free text out of snippet
+
+USE SNIPPET ./first_snippet WITH snippet->'./parameter_snippet'
+
+This is a text that will be overwritten by the text of the snippet above
+
+
+END SNIPPET
+
+text after the snippet use, remains intact
+
+START SNIPPET parameter_snippet
+snippet from parameter
+END SNIPPET

@@ -1,0 +1,14 @@
+
+START SNIPPET first_snippet TEMPLATE
+this is the content of the first {snippet}
+it has multiple {lines}
+END SNIPPET
+
+This is free text out of snippet
+
+USE SNIPPET ./first_snippet WITH snippet="text segment" lines="rows"
+this is the content of the first text segment
+it has multiple rows
+END SNIPPET
+
+text after the snippet use, remains intact
