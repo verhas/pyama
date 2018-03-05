@@ -26,7 +26,7 @@ class FileReader:
         segments and the name is identified by group(1) matching the start regex. The line that matches is added to the
         segment as first line.
         '''
-        self.filename = filename.replace('\\','/')
+        self.filename = filename.replace('\\', '/')
         self.regexes = regexes
         self.segment_number = 0
 
@@ -74,11 +74,7 @@ class FileReader:
             for line in f:
                 is_start, name, end_regex_ = self._startsegment(line)
                 if is_start:
-                    old = segment
                     segment = Segment(name, self.filename)
-                    if old is not None:
-                        old.next = segment
-                    segment.previous = old
                     segments.append(segment)
                     end_regex = end_regex_
                     segment.add(line)
@@ -98,5 +94,13 @@ class FileReader:
                     segments.append(segment)
 
                 segment.add(line)
-
+        self.chain_segments(segments)
         return File(self.filename, segments)
+
+    def chain_segments(self, segments):
+        old = None
+        for segment in segments:
+            if old:
+                old.next = segment
+            segment.previous = old
+            old = segment
