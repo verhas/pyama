@@ -1,0 +1,16 @@
+
+START SNIPPET first_snippet TEMPLATE
+My name is {name}.
+END SNIPPET
+
+This is free text out of snippet
+
+USE SNIPPET ./first_snippet
+this is the conhahshakn
+fasdfasd
+as
+
+garbaseereee
+END SNIPPET
+
+text after the snippet use, remains intact

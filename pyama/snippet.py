@@ -4,11 +4,15 @@ import re
 import logging
 from pyama.template import SnippetFormatter
 
-snippets = {}
-macros = {}
-
 logger = logging.getLogger(__name__)
 
+
+def reset():
+    global snippets,macros
+    snippets = {}
+    macros = {}
+
+reset()
 
 class SnippetMacro(SegmentHandler):
     def __init__(self):
@@ -122,7 +126,7 @@ class SnippetWriter(SegmentHandler):
         if process:
             return self.processed(text, segment)
         else:
-            if re.search("\\s+TEMPLATE\\s+",text[0]):
+            if re.search("\\s+TEMPLATE\\s+", text[0]):
                 logger.warning("snippet was used as parameter, will not be processed as template: %s" % text[0][0:-1])
             return text
 
@@ -211,7 +215,7 @@ class SnippetWriter(SegmentHandler):
         text = self._get_modified_text(match.group(2), segment)
         if not text:
             return
-        text = self.chomp(text,False)
+        text = self.chomp(text, False)
         segment.text = [segment.text[0]] + text[1:-1] + [segment.text[-1]]
         segment.modified = True
     # END SNIPPET
@@ -241,7 +245,7 @@ class MdSnippetWriter(SnippetWriter):
         if len(segment.text) < 2:
             logger.warning("segment %s/%s is too short, can not be processed" % (segment.filename, segment.name))
         else:
-            text = self.chomp(text,False)
+            text = self.chomp(text, False)
             segment.text = [segment.text[0], segment.text[1]] + \
                            text[1:-1] + \
                            [segment.text[-1]]
