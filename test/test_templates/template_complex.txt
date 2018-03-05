@@ -13,11 +13,14 @@ END SNIPPET
 This is free text out of snippet
 
 USE SNIPPET ./first_snippet
-this is the conhahshakn
-fasdfasd
-as
+My name is Peter Verhas.
+The first three letter in the ABC are A B C 
+Peter Verhas is a good person
+Peter Verhas is not evil
+a is the 1-th character
+b is the 2-th character
+c is the 3-th character
 
-garbaseereee
 END SNIPPET
 
 text after the snippet use, remains intact

@@ -1,0 +1,12 @@
+
+START SNIPPET first_snippet
+this is the content of the first snippet it has one line
+END SNIPPET
+
+This is free text out of snippet
+
+USE SNIPPET ./first_snippet
+this is the content of the first snippet it has one line
+END SNIPPET
+
+text after the snippet use, remains intact

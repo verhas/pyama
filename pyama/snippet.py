@@ -8,11 +8,13 @@ logger = logging.getLogger(__name__)
 
 
 def reset():
-    global snippets,macros
+    global snippets, macros
     snippets = {}
     macros = {}
 
+
 reset()
+
 
 class SnippetMacro(SegmentHandler):
     def __init__(self):
@@ -196,7 +198,7 @@ class SnippetWriter(SegmentHandler):
             return text
         if len(text) < 2:
             logger.warning("segment %s is too short to trunace the last line " % text[0])
-        if text[-2][-1] == '\n' and text[-2][-2] == '\\':
+        if len(text[-2]) > 1 and text[-2][-1] == '\n' and text[-2][-2] == '\\':
             chomped = [s for s in text]
             if inline:
                 chomped[-2] = chomped[-2][0:-2]
