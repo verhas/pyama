@@ -155,7 +155,9 @@ keywords supported are
 The templating engine is implemented in the file `pyama/template.py`. It is 24 lines and
 it is documented in detail on the web page
 [The world's simplest Python template engine](https://makina-corpus.com/blog/metier/2016/the-worlds-simplest-python-template-engine).
-
+The templating in general is available in the
+[Python documentation](https://docs.python.org/3.4/library/string.html).
+ 
 ### Template snippet
 
 To signal that a snippet should be used as a template and the macros should be resolved
