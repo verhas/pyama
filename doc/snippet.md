@@ -129,24 +129,28 @@ are replaced by the assigned value.
 
 ### Template format
 
-The templating supports more complex macros. If the identifier is followed by a
+The template supports complex macros. If the identifier is followed by a
 colon and a special keyword then the assigned value is evaluated in a different way. The
 keywords supported are
 
 * `repeat` will repeat the text following the colon followed by the keyword for each element
-of the assigned value in case it is iterable or a dictionary. It is not possible to have
-such values using the snippet macros. This possibility is there for extra segment
-handlers that may want to put such value into the dictionary.
+   of the assigned value in case it is iterable or a dictionary. The elements that result empty string
+   or a string that is only white space are skipped. If there are any characters between the `repeat`
+   keyword and the following `:` colon then those characters will be inserted between the individual
+   elements. 
+
+   It is not possible to have such values using the snippet macros. This possibility is there for 
+   extra segment handlers that may want to put such value into the dictionary.
 
 * `call` will invoke the value if it is callable. It is not possible to have
-such values using the snippet macros. This possibility is there for extra segment
-handlers that may want to put such value into the dictionary.
+   such values using the snippet macros. This possibility is there for extra segment
+   handlers that may want to put such value into the dictionary.
 
 * `if` will include the text following the colon followed by the keyword if the value 
-evaluates `True`
+   evaluates `True`
 
 * `ifnot` will include tthe text following the colon followed by the keyword if the value 
-evaluates `False`. (For example empty string.)
+   evaluates `False`. (For example empty string.)
 
 The templating engine is implemented in the file `pyama/template.py`. It is 24 lines and
 it is documented in detail on the web page
