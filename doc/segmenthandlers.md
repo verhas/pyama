@@ -182,7 +182,7 @@ different segments having the same name.
 
 The `filename` the full path name of the file that was used to open the file for reading
 that contains the segment. It can be used by the handler to avoid handling files that
-it can not handle. If there is, for example, a handler that can handle only Python files
+it cannot handle. If there is, for example, a handler that can handle only Python files
 then this field can be used to ensure to manage only segments that belong to a file that
 has `.py` extension.
 
@@ -208,10 +208,10 @@ classes `SnippetWriter` and the class `MdSnippetWriter`.
         match = re.search(SnippetWriter.start_line, startline)
         if not match:
             return
-        text = self._get_modified_text(match.group(2), segment)
+        text = self.get_modified_text(match.group(2), segment)
         if not text:
             return
-        text = self.chomp(text,False)
+        text = self.chomp(text, False)
         segment.text = [segment.text[0]] + text[1:-1] + [segment.text[-1]]
         segment.modified = True
 ```
@@ -245,13 +245,13 @@ to `True`.
         match = re.search(SnippetWriter.start_line, startline)
         if not match:
             return
-        text = self._get_modified_text(match.group(2), segment)
+        text = self.get_modified_text(match.group(2), segment)
         if not text:
             return
         if len(segment.text) < 2:
-            logger.warning("segment %s/%s is too short, can not be processed" % (segment.filename, segment.name))
+            logger.warning("segment %s/%s is too short, cannot be processed" % (segment.filename, segment.name))
         else:
-            text = self.chomp(text,False)
+            text = self.chomp(text, False)
             segment.text = [segment.text[0], segment.text[1]] + \
                            text[1:-1] + \
                            [segment.text[-1]]

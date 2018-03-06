@@ -2,6 +2,7 @@ from pyama.segmenthandler import SegmentHandler
 from pyama.file import Segment
 import re
 import logging
+from pyama.template import SnippetFormatter
 
 logger = logging.getLogger("pyama.javahandler.JavaHandler")
 
@@ -59,11 +60,21 @@ class JavaHandler(SegmentHandler):
         if segment.name == "0":
             # we start a new file, forget classes we have already managed
             self.classname = None
+            self.template_parameters = {}
         if self.classname is None:
             for line in segment.text:
                 match = re.search("class\\s+(\\w[\\w\\d_]*)", line)
                 if match:
                     self.classname = match.group(1)
+                    self.template_parameters["class"] = match.group(1)
+                match = re.search("^\\s*package\\s+(.*)\\s*;\\s*$", line)
+                if match:
+                    self.template_parameters["package"] = match.group(1)
+                match = re.search("^\\s*import\\s+(.*)\\s*;\\s*$", line)
+                if match:
+                    if "imports" not in self.template_parameters:
+                        self.template_parameters["imports"] = []
+                    self.template_parameters["imports"].append(match.group(1))
 
     def handle_fields(self, segment: Segment):
         self.fields = []
@@ -72,27 +83,29 @@ class JavaHandler(SegmentHandler):
                 continue
             var = Var(line)
             self.fields.append(var)
+            if "fields" not in self.template_parameters:
+                self.template_parameters["fields"] = {}
+            self.template_parameters["fields"][var.name] = var
 
     def handle_constructor(self, segment):
         const_head = segment.text[1]
-        match = re.search("(.*)\\(.*\\)(.*)", const_head)
-        if not match:
-            logger.info("%s does not have constructor, generaing a public one" % self.classname)
-            const_head = "    public %s(){" % self.classname
-            match = re.search("(.*)\\(.*\\)(.*)", const_head)
-        const_head = match.group(1) + "("
-        sep = ""
+        match = re.search("\\s*(private|protected|public|).*\\(.*\\)(.*)\\{", const_head)
+        if match:
+            self.template_parameters["class_modifier"] = match.group(1)
+            self.template_parameters["class_throws"] = match.group(2)
+        else:
+            logger.info("%s does not have constructor, generating a public one" % self.classname)
+            self.template_parameters["class_modifier"] = "public"
+            self.template_parameters["class_throws"] = ""
         for var in self.fields:
-            if var.need_constructor():
-                const_head += sep + "final " + var.type + " " + var.name
-                sep = ", "
-        const_head += ")" + match.group(2) + "\n"
-        text = []
-        for var in self.fields:
-            if var.need_constructor():
-                text.append("        this.%s = %s;\n" % (var.name, var.name))
-        text.append("    }\n")
-        segment.text = [segment.text[0], const_head] + \
+            var.need_constructor_calculate()
+        sf = SnippetFormatter()
+        text = [s + "\n" for s in sf.format("""\
+    {class_modifier} {class}({fields:repeat,:{{value.need_constructor:if:final {{value.type}} {{value.name}} }} }){class_throws}{{
+{fields:repeat:{{value.need_constructor:if:        this.{{value.name}} = {{value.name}};}}
+}        }}
+        """, **self.template_parameters).split("\n")][0:-1]
+        segment.text = [segment.text[0]] + \
                        text + \
                        segment.text[len(segment.text) - 1:len(segment.text)]
         segment.modified = True
@@ -102,9 +115,9 @@ class JavaHandler(SegmentHandler):
         for_all = re.search("for\\s+all", line)
         text = []
         for var in self.fields:
-            if var.need_getter() or for_all:
+            if var.need_getter_calculate() or for_all:
                 text.append("    %s%s %s(){\n        return this.%s;\n    }\n" %
-                            (var.getter_modifier, var.type, var.getter_name(), var.name))
+                            (var.getter_modifier, var.type, var.getter_name_calculate(), var.name))
         segment.text = [segment.text[0]] + text + [segment.text[-1]]
         segment.modified = True
 
@@ -113,9 +126,9 @@ class JavaHandler(SegmentHandler):
         for_all = re.search("for\\s+all", line)
         text = []
         for var in self.fields:
-            if var.need_setter() or (for_all and var.maybe_setter()):
+            if var.need_setter_calculate() or (for_all and var.maybe_setter_calculate()):
                 text.append("    %svoid %s(final %s %s){\n        this.%s = %s;\n    }\n" %
-                            (var.setter_modifier, var.setter_name(), var.type, var.name, var.name, var.name))
+                            (var.setter_modifier, var.setter_name_calculate(), var.type, var.name, var.name, var.name))
         segment.text = [segment.text[0]] + text + [segment.text[-1]]
         segment.modified = True
 
@@ -151,9 +164,9 @@ class JavaHandler(SegmentHandler):
         return Objects.hash(""")
         sep = ""
         for var in self.fields:
-            if not var.need_equals():
+            if not var.need_equals_calculate():
                 continue
-            text.append("%s%s" % (sep, var.getter_name() + "()" if with_getters else var.name))
+            text.append("%s%s" % (sep, var.getter_name_calculate() + "()" if with_getters else var.name))
             sep = ", "
         text.append(");\n    }\n")
 
@@ -166,9 +179,9 @@ class JavaHandler(SegmentHandler):
         line_start = "\n        result = result * 31 + "
 
         for var in self.fields:
-            if not var.need_equals():
+            if not var.need_equals_calculate():
                 continue
-            variable_name = var.getter_name() + "()" if with_getters else var.name
+            variable_name = var.getter_name_calculate() + "()" if with_getters else var.name
             if var.type == "boolean":
                 text.append(line_start + "(%s ? 1 : 0);" % variable_name)
                 continue
@@ -197,9 +210,9 @@ class JavaHandler(SegmentHandler):
         classtest = self.create_classtest(allow_subclass)
         self.equals_start(classtest, text)
         for var in self.fields:
-            if not var.need_equals():
+            if not var.need_equals_calculate():
                 continue
-            variable_name = var.getter_name() + "()" if with_getters else var.name
+            variable_name = var.getter_name_calculate() + "()" if with_getters else var.name
             if var.type in ["boolean", "byte", "int", "long", "char", "short"]:
                 text.append("        if ( %s != other.%s ) return false;\n" % (variable_name, variable_name))
                 continue
@@ -219,9 +232,9 @@ class JavaHandler(SegmentHandler):
         classtest = self.create_classtest(allow_subclass)
         self.equals_start(classtest, text)
         for var in self.fields:
-            if not var.need_equals():
+            if not var.need_equals_calculate():
                 continue
-            variable_name = var.getter_name() + "()" if with_getters else var.name
+            variable_name = var.getter_name_calculate() + "()" if with_getters else var.name
             if var.type in ["boolean", "byte", "int", "long", "char", "short"]:
                 text.append("        if ( %s != other.%s ) return false;\n" % (variable_name, variable_name))
                 continue
@@ -264,7 +277,7 @@ class JavaHandler(SegmentHandler):
 """ % self.classname)
         sep = ""
         for var in self.fields:
-            variable_name = var.getter_name() + "()" if with_getters else var.name
+            variable_name = var.getter_name_calculate() + "()" if with_getters else var.name
             text.append('        sb.append("%s%s=").append(%s);\n' % (sep, variable_name, variable_name))
             sep = ","
         text.append("""        sb.append('}');
@@ -293,11 +306,11 @@ class JavaHandler(SegmentHandler):
         text.append("        }\n")
 
         for var in self.fields:
-            if not var.need_builder():
+            if not var.need_builder_calculate():
                 continue
             text.append(
                 "        public %s %s(final %s %s){\n            built.%s = %s;\n            return this;\n        }\n" %
-                (builder_classname, var.buildername(), var.type, var.name, var.name, var.name))
+                (builder_classname, var.builder_name_calculate(), var.type, var.name, var.name, var.name))
 
         text.append("    public static %s builder(){\n        return new %s();\n    }\n" %
                     (builder_classname, builder_classname))
@@ -321,6 +334,16 @@ class Var:
 
         self.assigned = not line.find("=") == -1
 
+        self.builder_name = None
+        self.getter_name = None
+        self.setter_name = None
+        self.need_constructor = None
+        self.need_getter = None
+        self.need_setter = None
+        self.maybe_setter = None
+        self.need_equals = None
+        self.need_builder = None
+
         self.setter_modifier = "public "
         self.getter_modifier = "public "
         if re.search(".*//.*protected\\s+setter", line):
@@ -343,7 +366,7 @@ class Var:
         else:
             self.builder_name = None
         self.builder_forced = re.search('.*//\\s*builder', line)
-        self.builder_forbidden =  not not re.search('.*//\\s*no\\s*builder', line)
+        self.builder_forbidden = not not re.search('.*//\\s*no\\s*builder', line)
         for tag in space.split(line):
             if tag == "final":
                 self.final = True
@@ -370,34 +393,43 @@ class Var:
                     # name is the last element we care, if there is init expression we ignore
                     break
 
-    def buildername(self):
-        if self.builder_name:
-            return self.builder_name
-        return "with" + self.name[:1].upper() + self.name[1:]
+    def builder_name_calculate(self):
+        if not self.builder_name:
+            self.builder_name = "with" + self.name[:1].upper() + self.name[1:]
+        return self.builder_name
 
-    def getter_name(self):
+    def getter_name_calculate(self):
         prefix = "is" if self.type in ["boolean", "Boolean"] else "get"
-        return prefix + self.name[:1].upper() + self.name[1:]
+        self.getter_name = prefix + self.name[:1].upper() + self.name[1:]
+        return self.getter_name
 
-    def setter_name(self):
-        return "set" + self.name[:1].upper() + self.name[1:]
+    def setter_name_calculate(self):
+        self.setter_name = "set" + self.name[:1].upper() + self.name[1:]
+        return self.setter_name
 
-    def need_constructor(self):
-        return self.constructor_forced or (self.final and not self.static and not self.assigned)
+    def need_constructor_calculate(self):
+        self.need_constructor = self.constructor_forced or (self.final and not self.static and not self.assigned)
+        return self.need_constructor
 
-    def need_getter(self):
-        return self.getter_forced or (self.access == "private" and not self.static)
+    def need_getter_calculate(self):
+        self.need_getter = self.getter_forced or (self.access == "private" and not self.static)
+        return self.need_getter
 
-    def need_setter(self):
-        return self.setter_forced or (self.access == "private" and not self.final and not self.static)
+    def need_setter_calculate(self):
+        self.need_setter = self.setter_forced or (self.access == "private" and not self.final and not self.static)
+        return self.need_setter
 
-    def maybe_setter(self):
-        return not self.final
+    def maybe_setter_calculate(self):
+        self.maybe_setter = not self.final
+        return self.maybe_setter
 
-    def need_equals(self):
-        return not self.static
+    def need_equals_calculate(self):
+        self.need_equals = not self.static
+        return self.need_equals
 
-    def need_builder(self):
+    def need_builder_calculate(self):
         if self.builder_forbidden:
+            self.need_builder = False
             return False
-        return (self.builder_forced) or (not self.static and not self.final and not self.assigned)
+        self.need_builder = (self.builder_forced) or (not self.static and not self.final and not self.assigned)
+        return self.need_builder

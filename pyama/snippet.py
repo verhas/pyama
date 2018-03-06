@@ -105,16 +105,16 @@ class SnippetWriter(SegmentHandler):
     def end(self):
         return 'END\\s+SNIPPET'
 
-    def _get_modified_text(self, snippet_reference, segment, process=True):
+    def get_modified_text(self, snippet_reference, segment, process=True):
         match = re.search("(.*)/(\\w[\\w\\d_]*)", snippet_reference)
         if not match:
             logger.warning("'%s' reference is not file/name format" % snippet_reference)
             return None
         file = match.group(1)
         snippet = match.group(2)
-        return self._get_snippet_text(file, snippet, segment, process)
+        return self.get_snippet_text(file, snippet, segment, process)
 
-    def _get_snippet_text(self, file, snippet, segment, process=True):
+    def get_snippet_text(self, file, snippet, segment, process=True):
         if file == '*':
             text = self.find_joker_snippet(snippet)
         else:
@@ -165,7 +165,7 @@ class SnippetWriter(SegmentHandler):
             if match:
                 line = match.group(3)
                 if value_is_from_snippet:
-                    text = self._get_modified_text(match.group(2), segment, process=False)
+                    text = self.get_modified_text(match.group(2), segment, process=False)
                     text = self.chomp(text)
                     value = "".join(text[1:-1])
                 else:
@@ -214,7 +214,7 @@ class SnippetWriter(SegmentHandler):
         match = re.search(SnippetWriter.start_line, startline)
         if not match:
             return
-        text = self._get_modified_text(match.group(2), segment)
+        text = self.get_modified_text(match.group(2), segment)
         if not text:
             return
         text = self.chomp(text, False)
@@ -241,11 +241,11 @@ class MdSnippetWriter(SnippetWriter):
         match = re.search(SnippetWriter.start_line, startline)
         if not match:
             return
-        text = self._get_modified_text(match.group(2), segment)
+        text = self.get_modified_text(match.group(2), segment)
         if not text:
             return
         if len(segment.text) < 2:
-            logger.warning("segment %s/%s is too short, can not be processed" % (segment.filename, segment.name))
+            logger.warning("segment %s/%s is too short, cannot be processed" % (segment.filename, segment.name))
         else:
             text = self.chomp(text, False)
             segment.text = [segment.text[0], segment.text[1]] + \

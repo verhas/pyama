@@ -6,7 +6,8 @@ The first three letter in the ABC are {list:repeat:{{item}} }
 }{yes:ifnot:{name} is evil
 }{no:if:{name} is not a good person
 }{no:ifnot:{name} is not evil}
-{dict:repeat:{{item[0]}} is the {{item[1]}}-th character
+{dict:repeat,:{{key}}={{value}}}
+{dict:repeat:{{key}} is the {{value}}-th character
 }\
 END SNIPPET
 

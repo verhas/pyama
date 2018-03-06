@@ -2,6 +2,9 @@ import string
 import re
 
 
+def filter_empty(text):
+    return filter(lambda x: not re.search("^\\s*\\Z", x, re.DOTALL), text)
+
 class SnippetFormatter(string.Formatter):
     """World's simplest Template engine.
        Originally from  Eric Brehault
@@ -17,11 +20,15 @@ class SnippetFormatter(string.Formatter):
                 re.search('repeat"(.*?)":(.*)', spec, re.DOTALL)
         if match:
             template = match.group(2)
+            sep = match.group(1)
             if type(value_string) is dict:
-                text = [self.format(template,key=key, value=value) for key, value in value_string.items()]
-                result = match.group(1).join(text)
+                text = filter_empty(
+                    [self.format(template, key=key, value=value) for key, value in value_string.items()])
+                result = sep.join(text)
                 return result
-            return match.group(1).join([template.format(item=item) for item in value_string])
+            text = filter_empty([template.format(item=item) for item in value_string])
+            result = sep.join(text)
+            return result
         elif spec == 'call':
             return value_string()
         elif spec.startswith('if:'):

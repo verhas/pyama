@@ -6,7 +6,8 @@ The first three letter in the ABC are {list:repeat:{{item}} }
 }{yes:ifnot:{name} is evil
 }{no:if:{name} is not a good person
 }{no:ifnot:{name} is not evil}
-{dict:repeat:{{item[0]}} is the {{item[1]}}-th character
+{dict:repeat,:{{key}}={{value}}}
+{dict:repeat:{{key}} is the {{value}}-th character
 }\
 END SNIPPET
 
@@ -17,6 +18,7 @@ My name is Peter Verhas.
 The first three letter in the ABC are A B C 
 Peter Verhas is a good person
 Peter Verhas is not evil
+a=1,b=2,c=3
 a is the 1-th character
 b is the 2-th character
 c is the 3-th character

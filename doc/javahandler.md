@@ -4,7 +4,7 @@ The Java Handler can be used to automatically generate
 
 * constructors that will get the arguments for the final fields that are not initialized,
 * getters and setters for the fields
-* `equals` and `hashCode` (only together, you can not generate only one)
+* `equals` and `hashCode` (only together, you cannot generate only one)
 * `toString` method.
 
 ## FIELDS
@@ -418,4 +418,4 @@ builder. The name of the method has to be between double quotes.
 ```
 
 The current implementation does not support optional and mandatory builder parameters
-and you also can not enforce any ordering.
+and you also cannot enforce any ordering.
