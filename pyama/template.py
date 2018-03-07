@@ -5,6 +5,7 @@ import re
 def filter_empty(text):
     return filter(lambda x: not re.search("^\\s*\\Z", x, re.DOTALL), text)
 
+
 class SnippetFormatter(string.Formatter):
     """World's simplest Template engine.
        Originally from  Eric Brehault
@@ -29,11 +30,17 @@ class SnippetFormatter(string.Formatter):
             text = filter_empty([template.format(item=item) for item in value_string])
             result = sep.join(text)
             return result
-        elif spec == 'call':
+        if spec == 'call':
             return value_string()
-        elif spec.startswith('if:'):
+        if spec.startswith('if:'):
             return (value_string and spec.partition(':')[-1]) or ''
-        elif spec.startswith('ifnot:'):
+        match = re.search("if=(.*?):", spec)
+        if match:
+            return (value_string == match.group(1) and spec.partition(':')[-1]) or ''
+        if spec.startswith('ifnot:'):
             return ((not value_string) and spec.partition(':')[-1]) or ''
-        else:
-            return super(SnippetFormatter, self).format_field(value_string, spec)
+        match = re.search("ifnot=(.*?):", spec)
+        if match:
+            return (value_string != match.group(1) and spec.partition(':')[-1]) or ''
+
+        return super(SnippetFormatter, self).format_field(value_string, spec)

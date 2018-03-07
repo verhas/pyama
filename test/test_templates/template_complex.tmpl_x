@@ -5,7 +5,11 @@ The first three letter in the ABC are {list:repeat:{{item}} }
 {yes:if:{name} is a good person
 }{yes:ifnot:{name} is evil
 }{no:if:{name} is not a good person
-}{no:ifnot:{name} is not evil}
+}{no:ifnot:{name} is not evil
+}{name:if=Bela:The name is bela... ERRROR
+}{name:if=Peter Verhas:The name is Peter Verhas... OK
+}{name:ifnot=Bela:The name is not Bela... OK
+}{name:ifnot=Peter Verhas:The name is not Peter Verhas... ERROR}
 {dict:repeat,:{{key}}={{value}}}
 {dict:repeat:{{key}} is the {{value}}-th character
 }\

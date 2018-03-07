@@ -147,10 +147,14 @@ keywords supported are
    handlers that may want to put such value into the dictionary.
 
 * `if` will include the text following the colon followed by the keyword if the value 
-   evaluates `True`
+   evaluates `True`. If the keyword `if` is followed by an equal sign `=` then the value is
+   compared to the string that stands between the `=` and `:` characters and if they are the same then
+   the text is included into the output.
 
 * `ifnot` will include the text following the colon followed by the keyword if the value 
-   evaluates `False`. (For example empty string.)
+   evaluates `False`. (For example empty string.) If the keyword `ifnot` is followed by an equal sign `=`
+   then the value is compared to the string that stands between the `=` and `:` characters and if they 
+   differ then the text is included into the output.
 
 The templating engine is implemented in the file `pyama/template.py`. It is 24 lines and
 it is documented in detail on the web page
