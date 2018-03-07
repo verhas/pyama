@@ -193,7 +193,7 @@ public class MyClass {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;        
+        if (o == null || getClass() != o.getClass()) return false;
 
         MyClass other = (MyClass) o;
 
@@ -223,28 +223,43 @@ public class MyClass {
 
 // START SNIPPET toString
     // TOSTRING with getters
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("MyClass{");
-        sb.append("isB()=").append(isB());
-        sb.append(",isBObj()=").append(isBObj());
-        sb.append(",getBy()=").append(getBy());
-        sb.append(",getObj()=").append(getObj());
-        sb.append(",getIObj()=").append(getIObj());
-        sb.append(",getI()=").append(getI());
-        sb.append(",getL()=").append(getL());
-        sb.append(",getLObj()=").append(getLObj());
-        sb.append(",getC()=").append(getC());
-        sb.append(",getCObj()=").append(getCObj());
-        sb.append(",getF()=").append(getF());
-        sb.append(",getFObj()=").append(getFObj());
-        sb.append(",getS()=").append(getS());
-        sb.append(",getSObj()=").append(getSObj());
-        sb.append(",getDObj()=").append(getDObj());
-        sb.append(",getD()=").append(getD());
-        sb.append('}');
-        return sb.toString();
-    }
+            @Override
+            public String toString() {
+                final StringBuilder sb = new StringBuilder("MyClass{");
+                sb.append("b=").append(isB());
+                sb.append(",")
+                sb.append("bObj=").append(isBObj());
+                sb.append(",")
+                sb.append("by=").append(getBy());
+                sb.append(",")
+                sb.append("obj=").append(getObj());
+                sb.append(",")
+                sb.append("iObj=").append(getIObj());
+                sb.append(",")
+                sb.append("i=").append(getI());
+                sb.append(",")
+                sb.append("l=").append(getL());
+                sb.append(",")
+                sb.append("lObj=").append(getLObj());
+                sb.append(",")
+                sb.append("c=").append(getC());
+                sb.append(",")
+                sb.append("cObj=").append(getCObj());
+                sb.append(",")
+                sb.append("f=").append(getF());
+                sb.append(",")
+                sb.append("fObj=").append(getFObj());
+                sb.append(",")
+                sb.append("s=").append(getS());
+                sb.append(",")
+                sb.append("sObj=").append(getSObj());
+                sb.append(",")
+                sb.append("dObj=").append(getDObj());
+                sb.append(",")
+                sb.append("d=").append(getD());
+                sb.append("}");
+                return sb.toString();
+            }
     // END
 //END SNIPPET
 }

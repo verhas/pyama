@@ -13,6 +13,7 @@ The first three letter in the ABC are {list:repeat:{{item}} }
 {dict:repeat,:{{key}}={{value}}}
 {dict:repeat:{{key}} is the {{value}}-th character
 }\
+{undefined} is undefined
 END SNIPPET
 
 This is free text out of snippet

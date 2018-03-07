@@ -33,7 +33,7 @@ Chapter IV
             sf.format(
                 '''Books:
 
-{books:repeat:"{{item[1]}}" by {{item[0]}}
+{books:repeat:"{{value}}" by {{key}}
 ----
 }''',
                 books={

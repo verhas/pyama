@@ -113,177 +113,206 @@ class JavaHandler(SegmentHandler):
     def handle_getters(self, segment):
         line = segment.text[0]
         for_all = re.search("for\\s+all", line)
-        text = []
         for var in self.fields:
-            if var.need_getter_calculate() or for_all:
-                text.append("    %s%s %s(){\n        return this.%s;\n    }\n" %
-                            (var.getter_modifier, var.type, var.getter_name_calculate(), var.name))
+            var.need_getter_calculate(for_all)
+            var.getter_name_calculate()
+
+        sf = SnippetFormatter()
+        text = [s + "\n" for s in sf.format("""\
+{fields:repeat:{{value.need_getter:if:\
+    {{value.getter_modifier}}{{value.getter_modifier:if: }}{{value.type}} {{value.getter_name}}(){{{{
+        return this.{{value.name}};
+    }}}}
+}}}""", **self.template_parameters).split("\n")][0:-1]
         segment.text = [segment.text[0]] + text + [segment.text[-1]]
         segment.modified = True
 
     def handle_setters(self, segment):
         line = segment.text[0]
         for_all = re.search("for\\s+all", line)
-        text = []
         for var in self.fields:
-            if var.need_setter_calculate() or (for_all and var.maybe_setter_calculate()):
-                text.append("    %svoid %s(final %s %s){\n        this.%s = %s;\n    }\n" %
-                            (var.setter_modifier, var.setter_name_calculate(), var.type, var.name, var.name, var.name))
+            var.need_setter_calculate(for_all)
+            var.setter_name_calculate()
+
+        sf = SnippetFormatter()
+        text = [s + "\n" for s in sf.format("""\
+{fields:repeat:{{value.need_setter:if:\
+    {{value.setter_modifier}}{{value.setter_modifier:if: }}void {{value.setter_name}}(final {{value.type}} {{value.name}}){{{{
+        this.{{value.name}} = {{value.name}};
+    }}}}
+}}}""", **self.template_parameters).split("\n")][0:-1]
         segment.text = [segment.text[0]] + text + [segment.text[-1]]
         segment.modified = True
+        return
 
     def handle_equals(self, segment):
         line = segment.text[0]
-        with_getters = re.search("with\\s+getters", line)
-        allow_subclass = re.search("allow\\s+subclass", line)
+        self.template_parameters["equals_with_getters"] = re.search("with\\s+getters", line)
+        self.template_parameters["equals_allow_subclass"] = re.search("allow\\s+subclass", line)
+        self.template_parameters["equals_allow_simple"] = re.search("simple", line)
+        self.template_parameters["equals_allow_Objects"] = re.search("Objects", line)
+        for var in self.fields:
+            var.getter_name_calculate()
+            var.need_equals_calculate()
+            var.type_category_calculate()
+
         if re.search("simple", line):
-            self.handle_simple_equals_and_hash_code(segment, with_getters, allow_subclass)
+            self.handle_simple_equals_and_hash_code(segment)
             return
         if re.search("Objects", line):
-            self.handle_objects_equals_and_hash_code(segment, with_getters, allow_subclass)
+            self.handle_objects_equals_and_hash_code(segment)
             return
-        self.handle_objects_equals_and_hash_code(segment, with_getters, allow_subclass)
+        self.handle_objects_equals_and_hash_code(segment)
 
-    def handle_simple_equals_and_hash_code(self, segment, with_getters, allow_subclass):
-        text = []
-        self.generate_simple_equals(text, allow_subclass, with_getters)
-        self.generate_simple_hash_code(text, with_getters)
+    def handle_simple_equals_and_hash_code(self, segment):
+        text = self.generate_simple_equals() + self.generate_simple_hash_code()
         segment.text = [segment.text[0]] + text + [segment.text[-1]]
         segment.modified = True
 
-    def handle_objects_equals_and_hash_code(self, segment, with_getters, allow_subclass):
-        text = []
-        self.generate_objects_equals(text, allow_subclass, with_getters)
-        self.generate_objects_hash_code(text, with_getters)
+    def handle_objects_equals_and_hash_code(self, segment):
+        text = self.generate_objects_equals() + self.generate_objects_hash_code()
         segment.text = [segment.text[0]] + text + [segment.text[-1]]
         segment.modified = True
 
-    def generate_objects_hash_code(self, text, with_getters):
-        text.append("""    @Override
-    public int hashCode() {
-        return Objects.hash(""")
-        sep = ""
-        for var in self.fields:
-            if not var.need_equals_calculate():
-                continue
-            text.append("%s%s" % (sep, var.getter_name_calculate() + "()" if with_getters else var.name))
-            sep = ", "
-        text.append(");\n    }\n")
+    def generate_objects_hash_code(self):
+        sf = SnippetFormatter()
 
-    def generate_simple_hash_code(self, text, with_getters):
-        text.append("""    @Override
-    public int hashCode() {
-        int result = 0;""")
-        if any([var.type == "double" for var in self.fields]):
-            text.append("\n        long temp;\n")
-        line_start = "\n        result = result * 31 + "
-
-        for var in self.fields:
-            if not var.need_equals_calculate():
-                continue
-            variable_name = var.getter_name_calculate() + "()" if with_getters else var.name
-            if var.type == "boolean":
-                text.append(line_start + "(%s ? 1 : 0);" % variable_name)
-                continue
-            if var.type in ["byte", "char"]:
-                text.append(line_start + "(int)%s;" % variable_name)
-                continue
-            if var.type == "int":
-                text.append(line_start + "%s;" % variable_name)
-                continue
-            if var.type == "long":
-                text.append(line_start + "(int) (%s ^ (%s >>> 32));" % (variable_name, variable_name))
-                continue
-            if var.type == "float":
-                text.append(
-                    line_start + "(%s != +0.0f ? Float.floatToIntBits(%s) : 0);" % (variable_name, variable_name))
-                continue
-            if var.type == "double":
-                text.append("\n        temp = Double.doubleToLongBits(%s);" % variable_name)
-                text.append(line_start + " (int) (temp ^ (temp >>> 32));")
-                continue
-            text.append(line_start + "(%s != null ? %s.hashCode() : 0);" % (variable_name, variable_name))
-            continue
-        text.append("\n        return result;\n    }\n")
-
-    def generate_objects_equals(self, text, allow_subclass, with_getters):
-        classtest = self.create_classtest(allow_subclass)
-        self.equals_start(classtest, text)
-        for var in self.fields:
-            if not var.need_equals_calculate():
-                continue
-            variable_name = var.getter_name_calculate() + "()" if with_getters else var.name
-            if var.type in ["boolean", "byte", "int", "long", "char", "short"]:
-                text.append("        if ( %s != other.%s ) return false;\n" % (variable_name, variable_name))
-                continue
-            if var.type == "float":
-                text.append(
-                    "        if (Float.compare(other.%s, %s) != 0) return false;\n" % (variable_name, variable_name))
-                continue
-            if var.type == "double":
-                text.append(
-                    "        if (Double.compare(other.%s, %s) != 0) return false;\n" % (variable_name, variable_name))
-                continue
-            text.append("        if ( !Objects.equals(%s,other.%s) ) return false;\n" % (variable_name, variable_name))
-        text.append("        return true;\n    }\n")
+        text = [s + "\n" for s in sf.format("""\
+    @Override
+    public int hashCode() {{
+        return Objects.hash(\
+{equals_with_getters:ifnot:{fields:repeat, :{{value.need_equals:if:{{value.name}}}}}}\
+{equals_with_getters:if:{fields:repeat, :{{value.need_equals:if:{{value.getter_name}}()}}}});
+    }}
+""", **self.template_parameters).split("\n")][0:-1]
         return text
 
-    def generate_simple_equals(self, text, allow_subclass, with_getters):
-        classtest = self.create_classtest(allow_subclass)
-        self.equals_start(classtest, text)
-        for var in self.fields:
-            if not var.need_equals_calculate():
-                continue
-            variable_name = var.getter_name_calculate() + "()" if with_getters else var.name
-            if var.type in ["boolean", "byte", "int", "long", "char", "short"]:
-                text.append("        if ( %s != other.%s ) return false;\n" % (variable_name, variable_name))
-                continue
-            if var.type == "float":
-                text.append(
-                    "        if (Float.compare(other.%s, %s) != 0) return false;\n" % (variable_name, variable_name))
-                continue
-            if var.type == "double":
-                text.append(
-                    "        if (Double.compare(other.%s, %s) != 0) return false;\n" % (variable_name, variable_name))
-                continue
-            text.append("        if (%s != null ? !%s.equals(other.%s) : other.%s != null) return false;\n" % (
-                variable_name, variable_name, variable_name, variable_name))
-        text.append("        return true;\n    }\n")
+    def generate_simple_hash_code(self):
+        sf = SnippetFormatter()
+        self.template_parameters["need_long_tmp"] = any([var.type == "double" for var in self.fields])
+
+        text = [s + "\n" for s in sf.format("""\
+    @Override
+    public int hashCode() {{
+        int result = 0;
+{need_long_tmp:if:        long temp;
+}{equals_with_getters:ifnot:
+{fields:repeat:{{value.need_equals:if:\
+        {{value.type:if=boolean:result = result * 31 + ({{value.name}} ? 1 : 0);}}\
+{{value.type:if=byte:result = result * 31 + (int){{value.name}};}}\
+{{value.type:if=char:result = result * 31 + (int){{value.name}};}}\
+{{value.type:if=short:result = result * 31 + (int){{value.name}};}}\
+{{value.type:if=int:result = result * 31 + {{value.name}};}}\
+{{value.type:if=long:result = result * 31 + (int) ({{value.name}} ^ ({{value.name}} >>> 32));}}\
+{{value.type:if=float:result = result * 31 + ({{value.name}} != +0.0f ? Float.floatToIntBits({{value.name}}) : 0);}}\
+{{value.type:if=double:temp = Double.doubleToLongBits({{value.name}});
+        result = result * 31 +  (int) (temp ^ (temp >>> 32));}}\
+{{value.type_object:if:result = result * 31 + ({{value.name}} != null ? {{value.name}}.hashCode() : 0);}}\
+}}
+}\
+}{equals_with_getters:if:
+{fields:repeat:{{value.need_equals:if:\
+        {{value.type:if=boolean:result = result * 31 + ({{value.getter_name}}() ? 1 : 0);}}\
+{{value.type:if=byte:result = result * 31 + (int){{value.getter_name}}();}}\
+{{value.type:if=char:result = result * 31 + (int){{value.getter_name}}();}}\
+{{value.type:if=short:result = result * 31 + (int){{value.getter_name}}();}}\
+{{value.type:if=int:result = result * 31 + {{value.getter_name}}();}}\
+{{value.type:if=long:result = result * 31 + (int) ({{value.getter_name}}() ^ ({{value.getter_name}}() >>> 32));}}\
+{{value.type:if=float:result = result * 31 + ({{value.getter_name}}() != +0.0f ? Float.floatToIntBits({{value.getter_name}}()) : 0);}}\
+{{value.type:if=double:temp = Double.doubleToLongBits({{value.getter_name}}());
+        result = result * 31 +  (int) (temp ^ (temp >>> 32));}}\
+{{value.type_object:if:result = result * 31 + ({{value.getter_name}}() != null ? {{value.getter_name}}().hashCode() : 0);}}\
+}}
+}
+}\
+        return result;
+    }}
+""", **self.template_parameters).split("\n")][0:-1]
         return text
 
-    def equals_start(self, classtest, text):
-        text.append("""    @Override
-    public boolean equals(Object o) {
+    def generate_objects_equals(self):
+        sf = SnippetFormatter()
+        text = [s + "\n" for s in sf.format("""\
+    @Override
+    public boolean equals(Object o) {{
         if (this == o) return true;
-        """ + classtest + """        
+        \
+{equals_allow_subclass:if:if (!(o instanceof {class})) return false;}\
+{equals_allow_subclass:ifnot:if (o == null || getClass() != o.getClass()) return false;}\
 
-        %s other = (%s) o;
 
-""" % (self.classname, self.classname))
+        {class} other = ({class}) o;
+{equals_with_getters:ifnot:
+{fields:repeat:{{value.need_equals:if:\
+        {{value.type_simple:if:if ( {{value.name}} != other.{{value.name}} ) return false;}}\
+{{value.type:if=float:if (Float.compare(other.{{value.name}}, {{value.name}}) != 0) return false;}}\
+{{value.type:if=double:if (Double.compare(other.{{value.name}}, {{value.name}}) != 0) return false;}}\
+{{value.type_object:if:if ( !Objects.equals({{value.name}},other.{{value.name}}) ) return false;}}\
+}}
+}}{equals_with_getters:if:
+{fields:repeat:{{value.need_equals:if:\
+        {{value.type_simple:if:if ( {{value.getter_name}}() != other.{{value.getter_name}}() ) return false;}}\
+{{value.type:if=float:if (Float.compare(other.{{value.getter_name}}(), {{value.getter_name}}() ) != 0) return false;}}\
+{{value.type:if=double:if (Double.compare(other.{{value.getter_name}}(), {{value.getter_name}}() ) != 0) return false;}}\
+{{value.type_object:if:if ( !Objects.equals({{value.getter_name}}(),other.{{value.getter_name}}() ) ) return false;}}\
+}}
+}}        return true;
+    }}
+        """, **self.template_parameters).split("\n")][0:-1]
+        return text
 
-    def create_classtest(self, allow_subclass):
-        classtest = "if (!(o instanceof %s)) return false;" % self.classname \
-            if allow_subclass \
-            else "if (o == null || getClass() != o.getClass()) return false;"
-        return classtest
+    def generate_simple_equals(self):
+        sf = SnippetFormatter()
+        text = [s + "\n" for s in sf.format("""\
+    @Override
+    public boolean equals(Object o) {{
+        if (this == o) return true;
+        \
+{equals_allow_subclass:if:if (!(o instanceof {class})) return false;}\
+{equals_allow_subclass:ifnot:if (o == null || getClass() != o.getClass()) return false;}\
+
+
+        {class} other = ({class}) o;
+{equals_with_getters:ifnot:
+{fields:repeat:{{value.need_equals:if:\
+        {{value.type_simple:if:if ( {{value.name}} != other.{{value.name}} ) return false;}}\
+{{value.type:if=float:if (Float.compare(other.{{value.name}}, {{value.name}}) != 0) return false;}}\
+{{value.type:if=double:if (Double.compare(other.{{value.name}}, {{value.name}}) != 0) return false;}}\
+{{value.type_object:if:if ( {{value.name}} != null ? !{{value.name}}.equals(other.{{value.name}}) : other.{{value.name}} != null ) return false;}}\
+}}
+}}{equals_with_getters:if:
+{fields:repeat:{{value.need_equals:if:\
+        {{value.type_simple:if:if ( {{value.getter_name}}() != other.{{value.getter_name}}() ) return false;}}\
+{{value.type:if=float:if (Float.compare(other.{{value.getter_name}}(), {{value.getter_name}}() ) != 0) return false;}}\
+{{value.type:if=double:if (Double.compare(other.{{value.getter_name}}(), {{value.getter_name}}() ) != 0) return false;}}\
+{{value.type_object:if:if ( {{value.getter_name}}() != null ? !{{value.getter_name}}().equals(other.{{value.getter_name}}()) : other.{{value.getter_name}}() ) ) return false;}}\
+}}
+}}        return true;
+    }}
+        """, **self.template_parameters).split("\n")][0:-1]
+        return text
 
     def handle_tostring(self, segment):
         line = segment.text[0]
-        with_getters = re.search("with\\s+getters", line)
-        text = []
-        text.append("""    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("%s{");
-""" % self.classname)
-        sep = ""
+        self.template_parameters["tostring_with_getters"] = re.search("with\\s+getters", line)
         for var in self.fields:
-            variable_name = var.getter_name_calculate() + "()" if with_getters else var.name
-            text.append('        sb.append("%s%s=").append(%s);\n' % (sep, variable_name, variable_name))
-            sep = ","
-        text.append("""        sb.append('}');
-        return sb.toString();
-    }
-""")
+            var.getter_name_calculate()
+        sf = SnippetFormatter()
+
+        text = [s + "\n" for s in sf.format("""\
+            @Override
+            public String toString() {{
+                final StringBuilder sb = new StringBuilder("{class}{{");
+{tostring_with_getters:ifnot:{fields:repeat\
+                sb.append(",")\n:\
+                sb.append("{{value.name}}=").append({{value.name}});\n}}\
+{tostring_with_getters:if:{fields:repeat\
+                sb.append(",")\n:\
+                sb.append("{{value.name}}=").append({{value.getter_name}}());\n}}\
+                sb.append("}}");
+                return sb.toString();
+            }}
+        """, **self.template_parameters).split("\n")][0:-1]
         segment.text = [segment.text[0]] + text + [segment.text[-1]]
         segment.modified = True
 
@@ -327,8 +356,6 @@ class JavaHandler(SegmentHandler):
 class Var:
     def __init__(self, line):
         self.access = "package"
-        self.type = None
-        self.name = None
         self.final = False
         self.static = False
         self.type = None
@@ -349,12 +376,15 @@ class Var:
         self.need_equals = None
         self.need_builder = None
 
-        self.setter_modifier = "public "
-        self.getter_modifier = "public "
+        self.type_simple = None
+        self.type_object = None
+
+        self.setter_modifier = "public"
+        self.getter_modifier = "public"
         if re.search(".*//.*protected\\s+setter", line):
-            self.setter_modifier = "protected "
+            self.setter_modifier = "protected"
         if re.search(".*//.*protected\\s+getter", line):
-            self.getter_modifier = "protected "
+            self.getter_modifier = "protected"
         if re.search(".*//.*package\\s+setter", line):
             self.setter_modifier = ""
         if re.search(".*//.*package\\s+getter", line):
@@ -416,13 +446,12 @@ class Var:
         self.need_constructor = self.constructor_forced or (self.final and not self.static and not self.assigned)
         return self.need_constructor
 
-    def need_getter_calculate(self):
-        self.need_getter = self.getter_forced or (self.access == "private" and not self.static)
-        return self.need_getter
+    def need_getter_calculate(self, for_all=False):
+        self.need_getter = for_all or self.getter_forced or (self.access == "private" and not self.static)
 
-    def need_setter_calculate(self):
-        self.need_setter = self.setter_forced or (self.access == "private" and not self.final and not self.static)
-        return self.need_setter
+    def need_setter_calculate(self, for_all=False):
+        self.need_setter = for_all or self.setter_forced or (
+                    self.access == "private" and not self.final and not self.static)
 
     def maybe_setter_calculate(self):
         self.maybe_setter = not self.final
@@ -438,3 +467,13 @@ class Var:
             return False
         self.need_builder = (self.builder_forced) or (not self.static and not self.final and not self.assigned)
         return self.need_builder
+
+    def type_category_calculate(self):
+        if self.type in ["boolean", "byte", "int", "long", "char", "short"]:
+            self.type_simple = True
+            self.type_object = False
+            return
+        if self.type != "double" and self.type != "float":
+            self.type_simple = False
+            self.type_object = True
+            return
