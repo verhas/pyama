@@ -47,69 +47,69 @@ public class MyClass {
 
 // START SNIPPET builder
     // BUILDER
-    public static class MyBuilder {
+     static class MyBuilder {
         private MyBuilder(){}
-        final MyClass built = new MyClass();
-        public MyBuilder build(){
+        private MyClass built = new MyClass();
+        public MyClass build(){
             final MyClass r = built;
             built = null;
             return r;
-        }
-        public MyBuilder withB(final boolean b){
+            }
+            public final MyBuilder withB(final boolean b){
             built.b = b;
             return this;
-        }
-        public MyBuilder withBy(final byte by){
+            }
+                public final MyBuilder withBy(final byte by){
             built.by = by;
             return this;
-        }
-        public MyBuilder withObj(final Object obj){
+            }
+                public final MyBuilder withObj(final Object obj){
             built.obj = obj;
             return this;
-        }
-        public MyBuilder withI(final int i){
+            }
+                public final MyBuilder withI(final int i){
             built.i = i;
             return this;
-        }
-        public MyBuilder withL(final long l){
+            }
+                public final MyBuilder withL(final long l){
             built.l = l;
             return this;
-        }
-        public MyBuilder withLObj(final Long lObj){
+            }
+                public final MyBuilder withLObj(final Long lObj){
             built.lObj = lObj;
             return this;
-        }
-        public MyBuilder withC(final char c){
+            }
+                public final MyBuilder withC(final char c){
             built.c = c;
             return this;
-        }
-        public MyBuilder separator(final Character cObj){
+            }
+                public final MyBuilder separator(final Character cObj){
             built.cObj = cObj;
             return this;
-        }
-        public MyBuilder withF(final float f){
+            }
+                public final MyBuilder withF(final float f){
             built.f = f;
             return this;
-        }
-        public MyBuilder withFObj(final Float fObj){
+            }
+                public final MyBuilder withFObj(final Float fObj){
             built.fObj = fObj;
             return this;
-        }
-        public MyBuilder withS(final short s){
+            }
+                public final MyBuilder withS(final short s){
             built.s = s;
             return this;
-        }
-        public MyBuilder withSObj(final Short sObj){
+            }
+                public final MyBuilder withSObj(final Short sObj){
             built.sObj = sObj;
             return this;
-        }
-        public MyBuilder withDObj(final Double dObj){
+            }
+                public final MyBuilder withDObj(final Double dObj){
             built.dObj = dObj;
             return this;
+            }
+        public static MyBuilder builder(){
+            return new MyBuilder();
         }
-    public static MyBuilder builder(){
-        return new MyBuilder();
-    }
     //END
 // END SNIPPET
 

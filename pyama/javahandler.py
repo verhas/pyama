@@ -289,32 +289,37 @@ class JavaHandler(SegmentHandler):
 
     def handle_builder(self, segment):
         line = segment.text[1]
-        match = re.search("class\\s+(\\w[\\w\\d_]*)", line)
+        match = re.search("(protected|private|public|).*class\\s+(\\w[\\w\\d_]*)", line)
         if match:
-            builder_classname = match.group(1)
-            text = [line]
+            self.template_parameters["builder_class_modifier"] = match.group(1)
+            self.template_parameters["builder_classname"] = match.group(2)
         else:
-            builder_classname = "Builder"
-            text = ["    public static class Builder {\n"]
-
-        text.append("        private %s(){}\n" % builder_classname)
-        text.append("        final %s built = new %s();\n" % (self.classname, self.classname))
-        text.append("        public %s build(){\n" % builder_classname)
-        text.append("            final %s r = built;\n" % self.classname)
-        text.append("            built = null;\n")
-        text.append("            return r;\n")
-        text.append("        }\n")
+            self.template_parameters["builder_class_modifier"] = "public"
+            self.template_parameters["builder_classname"] = "Builder"
 
         for var in self.fields:
-            if not var.need_builder_calculate():
-                continue
-            text.append(
-                "        public %s %s(final %s %s){\n            built.%s = %s;\n            return this;\n        }\n" %
-                (builder_classname, var.builder_name_calculate(), var.type, var.name, var.name, var.name))
+            var.need_builder_calculate()
+            var.builder_name_calculate()
 
-        text.append("    public static %s builder(){\n        return new %s();\n    }\n" %
-                    (builder_classname, builder_classname))
-
+        sf = SnippetFormatter()
+        text = [s + "\n" for s in sf.format("""\
+    {builder_class_modifier} static class {builder_classname} {{
+        private {builder_classname}(){{}}
+        private {class} built = new {class}();
+        public {class} build(){{
+            final {class} r = built;
+            built = null;
+            return r;
+            }}
+    {fields:repeat:{{value.need_builder:if:\
+        public final {builder_classname} {{value.builder_name}}(final {{value.type}} {{value.name}}){{{{
+            built.{{value.name}} = {{value.name}};
+            return this;
+            }}}}}}
+        }public static {builder_classname} builder(){{
+            return new {builder_classname}();
+        }}
+                """, **self.template_parameters).split("\n")][0:-1]
         segment.text = [segment.text[0]] + text + [segment.text[-1]]
         segment.modified = True
 
