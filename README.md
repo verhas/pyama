@@ -67,25 +67,63 @@ Processor(configs, "**/*.*").process()
 I wanted to have these code fragments copied from the source code, usually from
 unit test files. Whenever the unit test changed it had to be copied to the documentation.
 
-The first solution was to use some existing macro tool that processed some mainly
+The first solution was to use some existing macro tool that processed an "extended"
 markdown file and generated the markdown. Then I faced that the editors that show the
-markdown WYSIWYG could not cope with the file that still needed preprocessing.
+markdown WYSIWYG could not cope with the file that still needed preprocessing. The file
+name extension I used was not `.md` to separate the markdown files that needed preprocessing
+from those that were native markdown. If I wanted to have the files available on the GitHub
+web interface then I had to store them in the source directory and then the generated and
+the "real" source files got mixed. If they get mixed in a directory then there is no point
+to separate them into separate files.
 
-What I actually wanted was to automate the copy paste from the unit test code to the
-documentation and that is what Pyama does.
+The other approach is to accept the fact that some part of the source file is copied and
+generated and instead of trying to separate the source from any generated we try to automate
+the boilerplate code generation and the copy paste. Pyama does that. It automates the boilerplate
+generation and can copy parts of the source into other source files.
 
 ## What is Pyama
 
+Pyama will process your source files and if there is some modification that induces modification
+needs in other parts of the source code it automatically will change the code. It will copy part
+of some source files (probably code files) into other source files (probably documentation).
+
+It will also generate Java class setters, getters, constructors, equals, hashCode, toString and
+builder pattern out of the box.
+
+It will execute your small Python written handlers that you can code to generate code other than
+the prefabricated Java code generators. To do this Pyama provides simple API and simple SPI
+to implement in your handlers. All you need to focus is to generate the code from the available
+information, Pyama will do the rest: reading the file, file the segments that need modification,
+write back the result if there was any change.
+
+## How Pyama works
+
 Pyama reads a set of files, extracts information from these files and then selects some
-of the files and overwrites some part of those files. It automates the modification of
-the source files that are kind of redundant. The way it works general and extendable,
-configurable. To use it you do not need to understand Python, though it does not hurt.
+of the files and overwrites some part of those files.
+
+The configuration is done using fluent API as you could already see in the sample above.
+You define file name patterns and handers.
+
+Pyama reads the files that are configured and splits the read text into segments. The
+segments start with special lines as defined by the handlers. Different handlers may
+define different segment start and segment end patterns.
+
+When all the text are in segments in the memory then Pyama invokes the different handlers
+in several rounds letting them collect information from the text segments and also to
+modify the individual segments.
+
+After this phase, Pyama writes the files where one or more segment was changed.
+
+This structure is very general and the specific tasks are implemented in the handlers.
+
+## Use of Pyama
 
 Typically you will install Pyama into your development environment and you create a `run.py`
 file in your development root directory. You can name it any way you want btw. It will
-be a python source file. The actual `run.py` of this project you can see above.
+be an extremely simple Python source file. The actual `run.py` of this project you can
+see above.
 
-Yes, it was copied into this md file using Pyama. This little program declares the
+Yes, it was copied into this markdown file using Pyama. This little program declares the
 configuration that, in this case, says we are using markdown and python source files and
 we define two segment handlers. We will discuss them later. They need a bit of python
 knowledge but Pyama is designed so that it is extremely easy to create segment handlers.
@@ -97,7 +135,7 @@ code fragments from the python source files and `MdSnippetWriter` is written
 to modify the markdown files where it has to copy some of the code fragments
 the other segment handler collected before.
 
-Segments in python start with the line
+Snippet segments in Python start with the line
 
 ```python
 # START SNIPPET run_py
@@ -109,11 +147,14 @@ and the end of the segment is
 # END SNIPPET
 ```
 
+If other handlers also work with the Python files then they may define a different segment
+starting and segment ending patterns.
+
 The `run_py` is the name of the snippet. The `SnippetReader` will copy the lines between
 the start and end line into the memory and when `MdSnippetWriter` is executed it will
 be available in a python dictionary.
 
-Similarly, segments in the markdown files start with 
+Similarly, snippet segments in the markdown files start with 
 
 ```
 [//]: # (USE SNIPPET run.py/run__py)
@@ -124,7 +165,7 @@ Pyama to start a new segment and the `run.py/run_py` tells the segment handler
 `MdSnippetWriter` that it has to replace the content of the segment as it is now
 to the snippet that came from the file `run.py` and is named `run_py`. (Note that in the
 sample above I had to replace `run_py` with `run__py` otherwise Pyama was recognizing
-it as something it could process.)
+it as something it should process.)
 
 ## Command line options
 
