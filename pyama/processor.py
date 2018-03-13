@@ -20,7 +20,7 @@ class Processor:
         parser = argparse.ArgumentParser()
         parser.add_argument("-l", "--level",
                             help="set the logging level explicitly DEBUG, INFO, WARNING, ERROR or CRITICAL")
-        parser.add_argument("-d", "--dry", help="do not write the changes back to the files", action="store_true")
+        parser.add_argument("-n", "--dry", help="do not write the changes back to the files", action="store_true")
         parser.add_argument("-b", "--backup", help="create .BAK for changed files", action="store_true")
         parser.add_argument("-f", "--logfile", help="create .BAK for changed files")
         args = parser.parse_args()

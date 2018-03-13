@@ -170,14 +170,14 @@ it as something it should process.)
 ## Command line options
 
 ```bash
-usage: run.py [-h] [-l LEVEL] [-d] [-b] [-f LOGFILE]
+usage: run.py [-h] [-l LEVEL] [-n] [-b] [-f LOGFILE]
 
 optional arguments:
   -h, --help            show this help message and exit
   -l LEVEL, --level LEVEL
                         set the logging level explicitly DEBUG, INFO, WARNING,
                         ERROR or CRITICAL
-  -d, --dry             do not write the changes back to the files
+  -n, --dry             do not write the changes back to the files
   -b, --backup          create .BAK for changed files
   -f LOGFILE, --logfile LOGFILE
                         create .BAK for changed files

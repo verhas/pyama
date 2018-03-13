@@ -3,6 +3,7 @@ from pyama.file import Segment
 import re
 import logging
 from pyama.template import SnippetFormatter
+from pyama.snippet import SnippetMacro
 
 logger = logging.getLogger("pyama.javahandler.JavaHandler")
 
@@ -15,12 +16,14 @@ class JavaHandler(SegmentHandler):
     def __init__(self):
         self.fields = []
         self.classname = None
+        self.template_parameters = None
+        self.java_dict = {}
 
     def passes(self):
         """
-        :return: this handler does it all in one pass
+        :return: this handler needs two passes
         """
-        return [1]
+        return [1, 2]
 
     def start(self):
         return JavaHandler.start_line
@@ -29,31 +32,41 @@ class JavaHandler(SegmentHandler):
         return '//\\s*END'
 
     def handle(self, pass_nr, segment: Segment):
+        if pass_nr not in [1, 2]:
+            return
         if not re.search(".*\\.java$", segment.filename):
             return
         startline = segment.text[0]
         if re.search('//\\s*FIELDS', startline):
-            self.handle_fields(segment)
+            if pass_nr == 1:
+                self.handle_fields(segment)
             return
         if re.search('//\\s*CONSTRUCTOR', startline):
-            self.handle_constructor(segment)
+            if pass_nr == 2:
+                self.handle_constructor(segment)
             return
         if re.search('//\\s*GETTERS', startline):
-            self.handle_getters(segment)
+            if pass_nr == 2:
+                self.handle_getters(segment)
             return
         if re.search('//\\s*SETTERS', startline):
-            self.handle_setters(segment)
+            if pass_nr == 2:
+                self.handle_setters(segment)
             return
         if re.search('//\\s*EQUALS', startline):
-            self.handle_equals(segment)
+            if pass_nr == 2:
+                self.handle_equals(segment)
             return
         if re.search('//\\s*TOSTRING', startline):
-            self.handle_tostring(segment)
+            if pass_nr == 2:
+                self.handle_tostring(segment)
             return
         if re.search('//\\s*BUILDER', startline):
-            self.handle_builder(segment)
+            if pass_nr == 2:
+                self.handle_builder(segment)
             return
-        self.handle_general_segment(segment)
+        if pass_nr == 1:
+            self.handle_general_segment(segment)
         return
 
     def handle_general_segment(self, segment):
@@ -61,6 +74,8 @@ class JavaHandler(SegmentHandler):
             # we start a new file, forget classes we have already managed
             self.classname = None
             self.template_parameters = {}
+            self.java_dict[segment.filename] = self.template_parameters
+
         if self.classname is None:
             for line in segment.text:
                 match = re.search("class\\s+(\\w[\\w\\d_]*)", line)
@@ -79,6 +94,7 @@ class JavaHandler(SegmentHandler):
     def handle_fields(self, segment: Segment):
         self.fields = []
         for line in segment.text[1:len(segment.text) - 1]:
+            # skip java comment lines
             if re.search("^\\s*//", line):
                 continue
             var = Var(line)
@@ -87,28 +103,38 @@ class JavaHandler(SegmentHandler):
                 self.template_parameters["fields"] = {}
             self.template_parameters["fields"][var.name] = var
 
+    def template(self, template):
+        sf = SnippetFormatter()
+        return [s + "\n" for s in sf.format(template, **self.template_parameters).split("\n")][0:-1]
+
     def handle_constructor(self, segment):
         const_head = segment.text[1]
         match = re.search("\\s*(private|protected|public|).*\\(.*\\)(.*)\\{", const_head)
         if match:
-            self.template_parameters["class_modifier"] = match.group(1)
-            self.template_parameters["class_throws"] = match.group(2)
+            self.template_parameters["constructor_modifier"] = match.group(1)
+            self.template_parameters["constructor_throws"] = match.group(2)
         else:
             logger.info("%s does not have constructor, generating a public one" % self.classname)
-            self.template_parameters["class_modifier"] = "public"
-            self.template_parameters["class_throws"] = ""
+            self.template_parameters["constructor_modifier"] = "public"
+            self.template_parameters["constructor_throws"] = ""
         for var in self.fields:
             var.need_constructor_calculate()
-        sf = SnippetFormatter()
-        text = [s + "\n" for s in sf.format("""\
-    {class_modifier} {class}({fields:repeat,:{{value.need_constructor:if:final {{value.type}} {{value.name}} }} }){class_throws}{{
+        text = self.template("""\
+    {constructor_modifier} {class}({fields:repeat,:{{value.need_constructor:if:final {{value.type}} {{value.name}} }} }){constructor_throws}{{
 {fields:repeat:{{value.need_constructor:if:        this.{{value.name}} = {{value.name}};}}
 }        }}
-        """, **self.template_parameters).split("\n")][0:-1]
-        segment.text = [segment.text[0]] + \
+        """)
+        end_start = self.find_start(segment)
+        segment.text = segment.text[0:end_start] + \
                        text + \
                        segment.text[len(segment.text) - 1:len(segment.text)]
         segment.modified = True
+
+    def find_start(self, segment):
+        for i in range(1, len(segment.text)):
+            if re.search("//\\s*START", segment.text[i]):
+                return i + 1
+        return 1
 
     def handle_getters(self, segment):
         line = segment.text[0]
@@ -117,13 +143,12 @@ class JavaHandler(SegmentHandler):
             var.need_getter_calculate(for_all)
             var.getter_name_calculate()
 
-        sf = SnippetFormatter()
-        text = [s + "\n" for s in sf.format("""\
+        text = self.template("""\
 {fields:repeat:{{value.need_getter:if:\
     {{value.getter_modifier}}{{value.getter_modifier:if: }}{{value.type}} {{value.getter_name}}(){{{{
         return this.{{value.name}};
     }}}}
-}}}""", **self.template_parameters).split("\n")][0:-1]
+}}}""")
         segment.text = [segment.text[0]] + text + [segment.text[-1]]
         segment.modified = True
 
@@ -135,12 +160,12 @@ class JavaHandler(SegmentHandler):
             var.setter_name_calculate()
 
         sf = SnippetFormatter()
-        text = [s + "\n" for s in sf.format("""\
+        text = self.template("""\
 {fields:repeat:{{value.need_setter:if:\
     {{value.setter_modifier}}{{value.setter_modifier:if: }}void {{value.setter_name}}(final {{value.type}} {{value.name}}){{{{
         this.{{value.name}} = {{value.name}};
     }}}}
-}}}""", **self.template_parameters).split("\n")][0:-1]
+}}}""")
         segment.text = [segment.text[0]] + text + [segment.text[-1]]
         segment.modified = True
         return
@@ -175,23 +200,19 @@ class JavaHandler(SegmentHandler):
         segment.modified = True
 
     def generate_objects_hash_code(self):
-        sf = SnippetFormatter()
-
-        text = [s + "\n" for s in sf.format("""\
+        return self.template("""\
     @Override
     public int hashCode() {{
         return Objects.hash(\
 {equals_with_getters:ifnot:{fields:repeat, :{{value.need_equals:if:{{value.name}}}}}}\
 {equals_with_getters:if:{fields:repeat, :{{value.need_equals:if:{{value.getter_name}}()}}}});
     }}
-""", **self.template_parameters).split("\n")][0:-1]
-        return text
+""")
 
     def generate_simple_hash_code(self):
-        sf = SnippetFormatter()
         self.template_parameters["need_long_tmp"] = any([var.type == "double" for var in self.fields])
 
-        text = [s + "\n" for s in sf.format("""\
+        text = self.template("""\
     @Override
     public int hashCode() {{
         int result = 0;
@@ -227,12 +248,11 @@ class JavaHandler(SegmentHandler):
 }\
         return result;
     }}
-""", **self.template_parameters).split("\n")][0:-1]
+""")
         return text
 
     def generate_objects_equals(self):
-        sf = SnippetFormatter()
-        text = [s + "\n" for s in sf.format("""\
+        text = self.template("""\
     @Override
     public boolean equals(Object o) {{
         if (this == o) return true;
@@ -258,12 +278,12 @@ class JavaHandler(SegmentHandler):
 }}
 }}        return true;
     }}
-        """, **self.template_parameters).split("\n")][0:-1]
+        """)
         return text
 
     def generate_simple_equals(self):
         sf = SnippetFormatter()
-        text = [s + "\n" for s in sf.format("""\
+        text = self.template("""\
     @Override
     public boolean equals(Object o) {{
         if (this == o) return true;
@@ -289,7 +309,7 @@ class JavaHandler(SegmentHandler):
 }}
 }}        return true;
     }}
-        """, **self.template_parameters).split("\n")][0:-1]
+        """)
         return text
 
     def handle_tostring(self, segment):
@@ -299,7 +319,7 @@ class JavaHandler(SegmentHandler):
             var.getter_name_calculate()
         sf = SnippetFormatter()
 
-        text = [s + "\n" for s in sf.format("""\
+        text = self.template("""\
             @Override
             public String toString() {{
                 final StringBuilder sb = new StringBuilder("{class}{{");
@@ -312,13 +332,15 @@ class JavaHandler(SegmentHandler):
                 sb.append("}}");
                 return sb.toString();
             }}
-        """, **self.template_parameters).split("\n")][0:-1]
+        """)
         segment.text = [segment.text[0]] + text + [segment.text[-1]]
         segment.modified = True
 
     def handle_builder(self, segment):
         line = segment.text[1]
-        match = re.search("(protected|private|public|).*class\\s+(\\w[\\w\\d_]*)", line)
+        match = re.search("(protected|private|public).*class\\s+(\\w[\\w\\d_]*)", line)
+        if not match:
+            match = re.search("().*class\\s+(\\w[\\w\\d_]*)", line)
         if match:
             self.template_parameters["builder_class_modifier"] = match.group(1)
             self.template_parameters["builder_classname"] = match.group(2)
@@ -331,7 +353,7 @@ class JavaHandler(SegmentHandler):
             var.builder_name_calculate()
 
         sf = SnippetFormatter()
-        text = [s + "\n" for s in sf.format("""\
+        text = self.template("""\
     {builder_class_modifier} static class {builder_classname} {{
         private {builder_classname}(){{}}
         private {class} built = new {class}();
@@ -341,14 +363,14 @@ class JavaHandler(SegmentHandler):
             return r;
             }}
     {fields:repeat:{{value.need_builder:if:\
-        public final {builder_classname} {{value.builder_name}}(final {{value.type}} {{value.name}}){{{{
-            built.{{value.name}} = {{value.name}};
-            return this;
-            }}}}}}
+    public final {builder_classname} {{value.builder_name}}(final {{value.type}} {{value.name}}){{{{
+        built.{{value.name}} = {{value.name}};
+        return this;
+        }}}}}}
         }public static {builder_classname} builder(){{
             return new {builder_classname}();
         }}
-                """, **self.template_parameters).split("\n")][0:-1]
+                """)
         segment.text = [segment.text[0]] + text + [segment.text[-1]]
         segment.modified = True
 
@@ -451,7 +473,7 @@ class Var:
 
     def need_setter_calculate(self, for_all=False):
         self.need_setter = for_all or self.setter_forced or (
-                    self.access == "private" and not self.final and not self.static)
+                self.access == "private" and not self.final and not self.static)
 
     def maybe_setter_calculate(self):
         self.maybe_setter = not self.final

@@ -47,7 +47,7 @@ public class MyClass {
 
 // START SNIPPET builder
     // BUILDER
-     static class MyBuilder {
+    public static class MyBuilder {
         private MyBuilder(){}
         private MyClass built = new MyClass();
         public MyClass build(){
@@ -55,58 +55,58 @@ public class MyClass {
             built = null;
             return r;
             }
-            public final MyBuilder withB(final boolean b){
-            built.b = b;
-            return this;
-            }
-                public final MyBuilder withBy(final byte by){
-            built.by = by;
-            return this;
-            }
-                public final MyBuilder withObj(final Object obj){
-            built.obj = obj;
-            return this;
-            }
-                public final MyBuilder withI(final int i){
-            built.i = i;
-            return this;
-            }
-                public final MyBuilder withL(final long l){
-            built.l = l;
-            return this;
-            }
-                public final MyBuilder withLObj(final Long lObj){
-            built.lObj = lObj;
-            return this;
-            }
-                public final MyBuilder withC(final char c){
-            built.c = c;
-            return this;
-            }
-                public final MyBuilder separator(final Character cObj){
-            built.cObj = cObj;
-            return this;
-            }
-                public final MyBuilder withF(final float f){
-            built.f = f;
-            return this;
-            }
-                public final MyBuilder withFObj(final Float fObj){
-            built.fObj = fObj;
-            return this;
-            }
-                public final MyBuilder withS(final short s){
-            built.s = s;
-            return this;
-            }
-                public final MyBuilder withSObj(final Short sObj){
-            built.sObj = sObj;
-            return this;
-            }
-                public final MyBuilder withDObj(final Double dObj){
-            built.dObj = dObj;
-            return this;
-            }
+        public final MyBuilder withB(final boolean b){
+        built.b = b;
+        return this;
+        }
+            public final MyBuilder withBy(final byte by){
+        built.by = by;
+        return this;
+        }
+            public final MyBuilder withObj(final Object obj){
+        built.obj = obj;
+        return this;
+        }
+            public final MyBuilder withI(final int i){
+        built.i = i;
+        return this;
+        }
+            public final MyBuilder withL(final long l){
+        built.l = l;
+        return this;
+        }
+            public final MyBuilder withLObj(final Long lObj){
+        built.lObj = lObj;
+        return this;
+        }
+            public final MyBuilder withC(final char c){
+        built.c = c;
+        return this;
+        }
+            public final MyBuilder separator(final Character cObj){
+        built.cObj = cObj;
+        return this;
+        }
+            public final MyBuilder withF(final float f){
+        built.f = f;
+        return this;
+        }
+            public final MyBuilder withFObj(final Float fObj){
+        built.fObj = fObj;
+        return this;
+        }
+            public final MyBuilder withS(final short s){
+        built.s = s;
+        return this;
+        }
+            public final MyBuilder withSObj(final Short sObj){
+        built.sObj = sObj;
+        return this;
+        }
+            public final MyBuilder withDObj(final Double dObj){
+        built.dObj = dObj;
+        return this;
+        }
         public static MyBuilder builder(){
             return new MyBuilder();
         }
