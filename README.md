@@ -172,7 +172,18 @@ it as something it should process.)
 
 [//]: # (USE SNIPPET run.py/run_output)
 ```bash
-usage: run.py [-h] [-l LEVEL] [-n] [-b] [-f LOGFILE]optional arguments:  -h, --help            show this help message and exit  -l LEVEL, --level LEVEL                        set the logging level explicitly DEBUG, INFO, WARNING,                        ERROR or CRITICAL  -n, --dry             do not write the changes back to the files  -b, --backup          create .BAK for changed files  -f LOGFILE, --logfile LOGFILE                        create .BAK for changed files```
+usage: run.py [-h] [-l LEVEL] [-n] [-b] [-f LOGFILE]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -l LEVEL, --level LEVEL
+                        set the logging level explicitly DEBUG, INFO, WARNING,
+                        ERROR or CRITICAL
+  -n, --dry             do not write the changes back to the files
+  -b, --backup          create .BAK for changed files
+  -f LOGFILE, --logfile LOGFILE
+                        create .BAK for changed files
+```
 
 ## Precooked handlers
 
@@ -180,6 +191,9 @@ Pyama comes with an ever-expanding list of pre-cooked handlers. These are
 
 * [snippet handler](./doc/snippet.md) can recognize code snippets in program source files
 and can copy these into documentation files (especially into markdown files)
+
+* [shell snippet handler](./doc/shellsnippet.md) can executes external program and
+use the output of the code as snippet
 
 * [javahandler](./doc/javahandler.md) can create constructors, setters, getters, `equals`
 and `hashCode` methods as well as `toString` and nested builder class in Java classes.
