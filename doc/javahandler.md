@@ -58,19 +58,19 @@ This segment has to precede the other segments that this handler works with.
 ## CONSTRUCTOR
 
 The constructor segment starts with a line containing `CONSTRUCTOR` and ends with a line containing
-`END`. This segment is overwritten by the handler.
+`END`. This segment is partially overwritten by the handler.
 
 The handler will generate a constructor that initializes all `final` fields that do not get value
 on the line where they are declared and those fields that have the string `constructor` on the
 line where they are declared. In the sample above the fields `d` is included because it is
 `final`, no value was assigned to it and it is not `static`. The field `b` is included because 
 it has a comment that says it has to be included no matter what. Note that if there is a
-`// constructor` comment on a field declaration line for a field that is `final` and `static` the
-pyama will generate a constructor that will not compile. Pyama is mainly based on regular
+`// constructor` comment on a field declaration line for a field that is `final` and `static`
+Pyama will generate a constructor that will not compile. Pyama is mainly based on regular
 expressions, string handling and it does not analyze Java code.
 
 You can slightly modify the generated constructor and Pyama may keep the changes. You can change the
-access modifier of the constructor and Pyama will consider than when regenerating the new constructor when
+access modifier of the constructor and Pyama will consider that when regenerating the new constructor whenever
 a field has changed. What actually Pyama does is, that it looks at the first line of the segment and if that
 segment looks like something like a constructor head (actually matching the regular expression `.*\(.*\).*`
 then it will use that line replacing the part between the parentheses with the new parameters. 
@@ -84,6 +84,34 @@ then it will use that line replacing the part between the parentheses with the n
     }
     // END
 ```
+
+Sometimes the constructor calls `super()` with some arguments and it also may perform some other tasks. You
+can do that after the first line of the constructor after these have a line that reads
+
+```
+    // START
+```
+
+Pyama will search for this line and if there is one it will copy the lines before it, as well as
+the `// START` line verbatim to the output segment. The field initialization will be generated after the
+`// START` line.
+
+[//]: # (USE SNIPPET test/test_templates/ConstructorGenerateFromExistingWithStart.java/demo_start_line)
+```java
+    // should remain private and should keep the throws Exception
+// CONSTRUCTOR
+    private MyClass(final boolean b, final double d) throws Exception {
+        super(b,c);
+    // START
+        this.b = b;
+        this.d = d;
+        }
+// END
+```
+
+In the example above the constructor is head is regenerated whenever there is a change in the fields. The
+lines following that up to the line and including the one containing `// START` are copied. This way the
+invocation of the super is intact. The lines following the line `// START` are replaced.
 
 The name of the constructor in Java is the same as the name of the class. The handler reads
 the segments at the start of the file that declares the class. It looks for a line that has the

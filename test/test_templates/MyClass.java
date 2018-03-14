@@ -115,7 +115,7 @@ public class MyClass {
 
 // START SNIPPET constructor
     // CONSTRUCTOR
-    public MyClass(final boolean b  ,final double d  ){
+    public MyClass(final boolean b, final double d){
         this.b = b;
         this.d = d;
         }

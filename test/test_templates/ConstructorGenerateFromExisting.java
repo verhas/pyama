@@ -25,7 +25,7 @@ public class MyClass {
 
     // should remain private and should keep the throws Exception
 // CONSTRUCTOR
-    private MyClass(final boolean b  ,final double d  ) throws Exception {
+    private MyClass(final boolean b, final double d) throws Exception {
         this.b = b;
         this.d = d;
         }

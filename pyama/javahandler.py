@@ -120,13 +120,15 @@ class JavaHandler(SegmentHandler):
         for var in self.fields:
             var.need_constructor_calculate()
         text = self.template("""\
-    {constructor_modifier} {class}({fields:repeat,:{{value.need_constructor:if:final {{value.type}} {{value.name}} }} }){constructor_throws}{{
+    {constructor_modifier} {class}({fields:repeat, :{{value.need_constructor:if:final {{value.type}} {{value.name}}}}}){constructor_throws}{{
 {fields:repeat:{{value.need_constructor:if:        this.{{value.name}} = {{value.name}};}}
 }        }}
         """)
         end_start = self.find_start(segment)
-        segment.text = segment.text[0:end_start] + \
-                       text + \
+        segment.text = segment.text[0:1]+ \
+                       text[0:1] +\
+                       segment.text[2:end_start] + \
+                       text[1:] + \
                        segment.text[len(segment.text) - 1:len(segment.text)]
         segment.modified = True
 

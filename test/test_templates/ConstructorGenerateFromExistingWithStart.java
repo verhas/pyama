@@ -23,15 +23,15 @@ public class MyClass {
     final double d;
     // END
 
+// START SNIPPET demo_start_line
     // should remain private and should keep the throws Exception
 // CONSTRUCTOR
-    private MyClass(final boolean b  ,final double d  ) throws Exception {
+    private MyClass(final boolean b, final double d) throws Exception {
         super(b,c);
     // START
-    private MyClass(final boolean b  ,final double d  ) throws Exception {
         this.b = b;
         this.d = d;
         }
 // END
-
+// END SNIPPET
 }

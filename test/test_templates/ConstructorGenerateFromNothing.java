@@ -24,7 +24,7 @@ public class MyClass {
     // END
 
 // CONSTRUCTOR
-    public MyClass(final boolean b  ,final double d  ){
+    public MyClass(final boolean b, final double d){
         this.b = b;
         this.d = d;
         }
