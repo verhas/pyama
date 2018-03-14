@@ -19,11 +19,12 @@ Let's copy here the file `run.py` of this project:
 ```python
 from pyama.configuration import Configuration
 from pyama.snippet import MdSnippetWriter, SnippetReader, SnippetMacro
+from pyama.shellsnippet import ShellSnippet
 from pyama.processor import Processor
 
-MD = Configuration().file(".*\\.md$").handler(MdSnippetWriter(),SnippetReader())
-PY = Configuration().file(".*\\.py$").handler(SnippetReader())
-JAVA = Configuration().file(".*\\.java$").handler(SnippetReader(),SnippetMacro())
+MD = Configuration().file(r".*\.md$").handler(MdSnippetWriter(),SnippetReader())
+PY = Configuration().file(r".*\.py$").handler(SnippetReader(), ShellSnippet())
+JAVA = Configuration().file(r".*\.java$").handler(SnippetReader(),SnippetMacro())
 configs = [MD, PY, JAVA]
 
 Processor(configs, "**/*.*").process()

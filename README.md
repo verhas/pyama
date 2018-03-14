@@ -54,11 +54,12 @@ you can have some sample code like the following:
 ```python
 from pyama.configuration import Configuration
 from pyama.snippet import MdSnippetWriter, SnippetReader, SnippetMacro
+from pyama.shellsnippet import ShellSnippet
 from pyama.processor import Processor
 
-MD = Configuration().file(".*\\.md$").handler(MdSnippetWriter(),SnippetReader())
-PY = Configuration().file(".*\\.py$").handler(SnippetReader())
-JAVA = Configuration().file(".*\\.java$").handler(SnippetReader(),SnippetMacro())
+MD = Configuration().file(r".*\.md$").handler(MdSnippetWriter(),SnippetReader())
+PY = Configuration().file(r".*\.py$").handler(SnippetReader(), ShellSnippet())
+JAVA = Configuration().file(r".*\.java$").handler(SnippetReader(),SnippetMacro())
 configs = [MD, PY, JAVA]
 
 Processor(configs, "**/*.*").process()
@@ -169,6 +170,7 @@ it as something it should process.)
 
 ## Command line options
 
+[//]: # (USE SNIPPET run.py/run_output)
 ```bash
 usage: run.py [-h] [-l LEVEL] [-n] [-b] [-f LOGFILE]
 
@@ -182,9 +184,6 @@ optional arguments:
   -f LOGFILE, --logfile LOGFILE
                         create .BAK for changed files
 ```
-
-(This is copied here with manual labor until we will have a handler that can run an external program
-and capture the output as a snippet.)
 
 ## Precooked handlers
 
