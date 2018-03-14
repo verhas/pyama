@@ -67,10 +67,11 @@ segments.
 
 ## Handler executions
 
-Pyama exeutes the handlers several times. It does several passes. In each pass it
+Pyama executes the handlers several times. It does several passes. In each pass it
 goes through all the handlers that are configured and if the actual handler is
 configured to be executed in the actual pass then it is executed for each segment
-in each file. The code that actually does this is included here:
+in each file. It is a bit complex in English, the Python code is more explanatory in this case.
+The code that actually does this is included here:
  
 [//]: # (USE SNIPPET */runhandlers)
 ```python
@@ -88,6 +89,14 @@ The handlers define a method `passes()` that return a list of numbers including 
 when they have to be included. This is a fairly general approach. Usually the number of
 passes is two. In the first pass the handlers collect information from the files. During
 the second pass some of the handlers modify some of the segments of some of the files.
+However, it does not stop a handler class to require several more passes.
+
+The method `file_handler_match()` checks that the handler was configured for the
+very specific file to be executed. As an example we can look at the code of `run.py`
+again, which is copied into this documentation above. The segment handler `SnippetReader()`
+will run for the Markdown, Python and Java files, because an instance is passed to the 
+configuration method `handler()`. On the other and `ShellSnippet()` will only be executed
+when the current file is a Python file, because it is configured only for the Python files.
 
 ## Wiring the files
 
