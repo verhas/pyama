@@ -7,11 +7,11 @@ from pyama.snippet import SnippetMacro
 
 logger = logging.getLogger("pyama.javahandler.JavaHandler")
 
-space = re.compile("\\s+|=|;")
+space = re.compile(r"\s+|=|;")
 
 
 class JavaHandler(SegmentHandler):
-    start_line = '//\\s*(?:FIELDS|CONSTRUCTOR|GETTERS|SETTERS|EQUALS|TOSTRING|BUILDER)'
+    start_line = r'//\s*(?:FIELDS|CONSTRUCTOR|GETTERS|SETTERS|EQUALS|TOSTRING|BUILDER)'
 
     def __init__(self):
         self.fields = []
@@ -29,39 +29,39 @@ class JavaHandler(SegmentHandler):
         return JavaHandler.start_line
 
     def end(self):
-        return '//\\s*END'
+        return r'//\s*END'
 
     def handle(self, pass_nr, segment: Segment):
         if pass_nr not in [1, 2]:
             return
-        if not re.search(".*\\.java$", segment.filename):
+        if not re.search(r".*\.java$", segment.filename):
             return
         startline = segment.text[0]
-        if re.search('//\\s*FIELDS', startline):
+        if re.search(r'//\s*FIELDS', startline):
             if pass_nr == 1:
                 self.handle_fields(segment)
             return
-        if re.search('//\\s*CONSTRUCTOR', startline):
+        if re.search(r'//\s*CONSTRUCTOR', startline):
             if pass_nr == 2:
                 self.handle_constructor(segment)
             return
-        if re.search('//\\s*GETTERS', startline):
+        if re.search(r'//\s*GETTERS', startline):
             if pass_nr == 2:
                 self.handle_getters(segment)
             return
-        if re.search('//\\s*SETTERS', startline):
+        if re.search(r'//\s*SETTERS', startline):
             if pass_nr == 2:
                 self.handle_setters(segment)
             return
-        if re.search('//\\s*EQUALS', startline):
+        if re.search(r'//\s*EQUALS', startline):
             if pass_nr == 2:
                 self.handle_equals(segment)
             return
-        if re.search('//\\s*TOSTRING', startline):
+        if re.search(r'//\s*TOSTRING', startline):
             if pass_nr == 2:
                 self.handle_tostring(segment)
             return
-        if re.search('//\\s*BUILDER', startline):
+        if re.search(r'//\s*BUILDER', startline):
             if pass_nr == 2:
                 self.handle_builder(segment)
             return
@@ -78,14 +78,14 @@ class JavaHandler(SegmentHandler):
 
         if self.classname is None:
             for line in segment.text:
-                match = re.search("class\\s+(\\w[\\w\\d_]*)", line)
+                match = re.search(r"class\s+(\w[\w\d_]*)", line)
                 if match:
                     self.classname = match.group(1)
                     self.template_parameters["class"] = match.group(1)
-                match = re.search("^\\s*package\\s+(.*)\\s*;\\s*$", line)
+                match = re.search(r"^\s*package\s+(.*)\s*;\s*$", line)
                 if match:
                     self.template_parameters["package"] = match.group(1)
-                match = re.search("^\\s*import\\s+(.*)\\s*;\\s*$", line)
+                match = re.search(r"^\s*import\s+(.*)\s*;\s*$", line)
                 if match:
                     if "imports" not in self.template_parameters:
                         self.template_parameters["imports"] = []
@@ -95,7 +95,7 @@ class JavaHandler(SegmentHandler):
         self.fields = []
         for line in segment.text[1:len(segment.text) - 1]:
             # skip java comment lines
-            if re.search("^\\s*//", line):
+            if re.search(r"^\s*//", line):
                 continue
             var = Var(line)
             self.fields.append(var)
@@ -109,7 +109,7 @@ class JavaHandler(SegmentHandler):
 
     def handle_constructor(self, segment):
         const_head = segment.text[1]
-        match = re.search("\\s*(private|protected|public|).*\\(.*\\)(.*)\\{", const_head)
+        match = re.search(r"\s*(private|protected|public|).*\(.*\)(.*)\{", const_head)
         if match:
             self.template_parameters["constructor_modifier"] = match.group(1)
             self.template_parameters["constructor_throws"] = match.group(2)
@@ -134,13 +134,13 @@ class JavaHandler(SegmentHandler):
 
     def find_start(self, segment):
         for i in range(1, len(segment.text)):
-            if re.search("//\\s*START", segment.text[i]):
+            if re.search(r"//\s*START", segment.text[i]):
                 return i + 1
         return 1
 
     def handle_getters(self, segment):
         line = segment.text[0]
-        for_all = re.search("for\\s+all", line)
+        for_all = re.search(r"for\s+all", line)
         for var in self.fields:
             var.need_getter_calculate(for_all)
             var.getter_name_calculate()
@@ -156,7 +156,7 @@ class JavaHandler(SegmentHandler):
 
     def handle_setters(self, segment):
         line = segment.text[0]
-        for_all = re.search("for\\s+all", line)
+        for_all = re.search(r"for\s+all", line)
         for var in self.fields:
             var.need_setter_calculate(for_all)
             var.setter_name_calculate()
@@ -174,8 +174,8 @@ class JavaHandler(SegmentHandler):
 
     def handle_equals(self, segment):
         line = segment.text[0]
-        self.template_parameters["equals_with_getters"] = re.search("with\\s+getters", line)
-        self.template_parameters["equals_allow_subclass"] = re.search("allow\\s+subclass", line)
+        self.template_parameters["equals_with_getters"] = re.search(r"with\s+getters", line)
+        self.template_parameters["equals_allow_subclass"] = re.search(r"allow\s+subclass", line)
         self.template_parameters["equals_allow_simple"] = re.search("simple", line)
         self.template_parameters["equals_allow_Objects"] = re.search("Objects", line)
         for var in self.fields:
@@ -316,7 +316,7 @@ class JavaHandler(SegmentHandler):
 
     def handle_tostring(self, segment):
         line = segment.text[0]
-        self.template_parameters["tostring_with_getters"] = re.search("with\\s+getters", line)
+        self.template_parameters["tostring_with_getters"] = re.search(r"with\s+getters", line)
         for var in self.fields:
             var.getter_name_calculate()
         sf = SnippetFormatter()
@@ -340,9 +340,9 @@ class JavaHandler(SegmentHandler):
 
     def handle_builder(self, segment):
         line = segment.text[1]
-        match = re.search("(protected|private|public).*class\\s+(\\w[\\w\\d_]*)", line)
+        match = re.search(r"(protected|private|public).*class\s+(\w[\w\d_]*)", line)
         if not match:
-            match = re.search("().*class\\s+(\\w[\\w\\d_]*)", line)
+            match = re.search(r"().*class\s+(\w[\w\d_]*)", line)
         if match:
             self.template_parameters["builder_class_modifier"] = match.group(1)
             self.template_parameters["builder_classname"] = match.group(2)
@@ -405,13 +405,13 @@ class Var:
 
         self.setter_modifier = "public"
         self.getter_modifier = "public"
-        if re.search(".*//.*protected\\s+setter", line):
+        if re.search(r".*//.*protected\s+setter", line):
             self.setter_modifier = "protected"
-        if re.search(".*//.*protected\\s+getter", line):
+        if re.search(r".*//.*protected\s+getter", line):
             self.getter_modifier = "protected"
-        if re.search(".*//.*package\\s+setter", line):
+        if re.search(r".*//.*package\s+setter", line):
             self.setter_modifier = ""
-        if re.search(".*//.*package\\s+getter", line):
+        if re.search(r".*//.*package\s+getter", line):
             self.getter_modifier = ""
         if re.search(".*//.*setter", line):
             self.setter_forced = True
@@ -419,13 +419,13 @@ class Var:
             self.getter_forced = True
         if re.search(".*//.*constructor", line):
             self.constructor_forced = True
-        match = re.search('.*//\\s*builder\\s+method\\s+"(.*)"', line)
+        match = re.search(r'.*//\s*builder\s+method\s+"(.*)"', line)
         if match:
             self.builder_name = match.group(1)
         else:
             self.builder_name = None
-        self.builder_forced = re.search('.*//\\s*builder', line)
-        self.builder_forbidden = not not re.search('.*//\\s*no\\s*builder', line)
+        self.builder_forced = re.search(r'.*//\s*builder', line)
+        self.builder_forbidden = not not re.search(r'.*//\s*no\s*builder', line)
         for tag in space.split(line):
             if tag == "final":
                 self.final = True

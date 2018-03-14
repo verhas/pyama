@@ -9,7 +9,7 @@ from pyama.configuration import Configuration
 
 class TestFileCollector(unittest.TestCase):
     def testCollectsFiles(self):
-        files = FileCollector([Configuration().file("\\.snip$")], "**/*.*").collect()
+        files = FileCollector([Configuration().file(r"\.snip$")], "**/*.*").collect()
         self.assertEqual(1, len(files), "There is only one *.snip file")
         self.assertEqual("snippet_test.snip", [x for x in files][0], "The file is snippet_test.snip")
 

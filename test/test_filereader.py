@@ -10,9 +10,9 @@ class TestFileReader(unittest.TestCase):
     def testReadsFile(self):
         reader = FileReader(
             "sample_reader_test.txt",
-            regexes=[('name="(\\w+)"','END SEGMENT'),
-                     ('\\s*\\*\\s*START\\s*(\\w+)','END SEGMENT'),
-                     ("PYTHON\s+SEGMENT\s+(\\w[\\w\\d_]*)",None)]
+            regexes=[(r'name="(\w+)"','END SEGMENT'),
+                     (r'\s*\*\s*START\s*(\w+)','END SEGMENT'),
+                     (r"PYTHON\s+SEGMENT\s+(\w[\w\d_]*)",None)]
             )
         file = reader.read()
         self.assertEqual(7,len(file.segments))

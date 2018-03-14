@@ -9,15 +9,15 @@ class LicenseHandler(SegmentHandler):
     def __init__(self):
         self.text = []
         self.filetypes = {
-            ".*\\.java$": {'line_nr': 0,
-                           'matcher': "^\\s*/\\*|^\\s*\\*|^\\s*\\*/",
+            r".*\.java$": {'line_nr': 0,
+                           'matcher': r"^\s*/\*|^\s*\*|^\s*\*/",
                            'stopper': "package|import|class",
                            'start': "/*",
                            'middle': " * ",
                            'end': " */"},
-            ".*\\.py$": {'line_nr': 1,
-                         'matcher': "^\\s*#",
-                         'stopper': "^\\s+[^#]",  # anything that is  not a comment line
+            r".*\.py$": {'line_nr': 1,
+                         'matcher': r"^\s*#",
+                         'stopper': r"^\s+[^#]",  # anything that is  not a comment line
                          'start': None,
                          'middle': ' # ',
                          'end': None}

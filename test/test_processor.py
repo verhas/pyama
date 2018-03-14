@@ -11,7 +11,7 @@ from pyama.processor import Processor
 class TestProcessor(unittest.TestCase):
     def testProcessing(self):
         TXT = Configuration() \
-            .file(".*\\.snip") \
+            .file(r".*\.snip") \
             .handler(SnippetReader(), SnippetWriter())
 
         configs = [TXT]

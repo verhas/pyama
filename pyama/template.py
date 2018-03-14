@@ -3,7 +3,7 @@ import re
 
 
 def filter_empty(text):
-    return filter(lambda x: not re.search("^\\s*\\Z", x, re.DOTALL), text)
+    return filter(lambda x: not re.search(r"^\s*\Z", x, re.DOTALL), text)
 
 
 class SnippetFormatter(string.Formatter):

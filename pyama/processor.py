@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def handler_tostring(handler):
     string = "%s" % handler
-    match = re.search("<.*?(\\w+)\\s+object\\s+at\\s+0x0*([\\dA-F]*)>",string)
+    match = re.search(r"<.*?(\w+)\s+object\s+at\s+0x0*([\dA-F]*)>",string)
     return match.group(1) + ":" + match.group(2) if match else string
 
 

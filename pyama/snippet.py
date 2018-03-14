@@ -16,6 +16,26 @@ def reset():
 reset()
 
 
+def get_snippets(file_name):
+    if file_name not in snippets:
+        logger.debug("first snippet for file %s" % file_name)
+        snippets[file_name] = {}
+    return snippets[file_name]
+
+
+def store_snippet(file_name, snippet_name, text):
+    file_snippets = get_snippets(file_name)
+
+    if snippet_name not in file_snippets:
+        logger.debug("Starting snippet %s" % snippet_name)
+        file_snippets[snippet_name] = text
+    else:
+        # concatenating snippets remove the start line from the appended snippet and the end line from the
+        # already stored snippet
+        logger.debug("Continuing snippet %s" % snippet_name)
+        file_snippets[snippet_name] = file_snippets[snippet_name][:-1] + text[1:]
+
+
 class SnippetMacro(SegmentHandler):
     def __init__(self):
         self.sf = SnippetFormatter()
@@ -31,10 +51,10 @@ class SnippetMacro(SegmentHandler):
         if segment.name == "0":
             self.regex = None
         for line in segment.text[1:-1]:
-            if re.search("NO\\s+MATCH\\W", line):
+            if re.search(r"NO\s+MATCH\W", line):
                 self.regex = None
                 continue
-            startline = re.search("MATCH\\s+(.*)", line)
+            startline = re.search(r"MATCH\s+(.*)", line)
             if startline:
                 self.regex = startline.group(1)
                 continue
@@ -45,7 +65,7 @@ class SnippetMacro(SegmentHandler):
 
 
 class SnippetReader(SegmentHandler):
-    start_line = 'START\\s+SNIPPET\\s+(\\w[\\w\\d_]*)'
+    start_line = r'START\s+SNIPPET\s+(\w[\w\d_]*)'
 
     def __init__(self):
         self.macro = SnippetMacro()
@@ -60,9 +80,16 @@ class SnippetReader(SegmentHandler):
         return SnippetReader.start_line
 
     def end(self):
-        return 'END\\s+SNIPPET'
+        return r'END\s+SNIPPET'
 
     def fetch_values(self, text, regex):
+        """
+        Fetch macro values from the lines of TEXT based on regex
+        :param text: the lines that may hold keys and values fr macros
+        :param regex: if that matches a line then group(1) is treated as key and group(2) is treated as value and
+        stored into the macroset to be references in snippets
+        :return:
+        """
         for line in text:
             match = re.search(regex, line)
             if match and match.lastindex >= 2:
@@ -72,23 +99,12 @@ class SnippetReader(SegmentHandler):
         startline = segment.text[0]
         if not re.search(SnippetReader.start_line, startline):
             return
-        if segment.filename not in snippets:
-            logger.debug("first snippet for file %s" % segment.filename)
-            snippets[segment.filename] = {}
-        if segment.name not in snippets[segment.filename]:
-            logger.debug("Starting snippet %s" % segment.name)
-            snippets[segment.filename][segment.name] = segment.text
-        else:
-            # concatenating snippets remove the start line from the appended snippet and the end line from the
-            # already stored snippet
-            logger.debug("Continuing snippet %s" % segment.name)
-            snippets[segment.filename][segment.name] = snippets[segment.filename][segment.name][:-1] + segment.text[1:]
-
+        store_snippet(segment.filename,segment.name,segment.text)
 
 class SnippetWriter(SegmentHandler):
     # (.{0}) will match a zero length name, and thus the segment will be numbered. We do not need a name, this is an
     # out out segment.
-    start_line = 'USE\\s+SNIPPET(.{0})\\s+([\\w\\d_/\\.\\*]+)'
+    start_line = r'USE\s+SNIPPET(.{0})\s+([\w\d_/\.\*]+)'
 
     def __init__(self):
         self.macro = SnippetMacro()
@@ -103,10 +119,10 @@ class SnippetWriter(SegmentHandler):
         return SnippetWriter.start_line
 
     def end(self):
-        return 'END\\s+SNIPPET'
+        return r'END\s+SNIPPET'
 
     def get_modified_text(self, snippet_reference, segment, process=True):
-        match = re.search("(.*)/(\\w[\\w\\d_]*)", snippet_reference)
+        match = re.search(r"(.*)/(\w[\w\d_]*)", snippet_reference)
         if not match:
             logger.warning("'%s' reference is not file/name format" % snippet_reference)
             return None
@@ -128,19 +144,19 @@ class SnippetWriter(SegmentHandler):
         if process:
             return self.processed(text, segment)
         else:
-            if re.search("\\s+TEMPLATE\\s+", text[0]):
+            if re.search(r"\s+TEMPLATE\s+", text[0]):
                 logger.warning("snippet was used as parameter, will not be processed as template: %s" % text[0][0:-1])
             return text
 
     def processed(self, text, segment):
         line = text[0]
-        if not re.search("\\s+TEMPLATE\\s+", line):
-            if re.search("\\s+WITH\\s+", segment.text[0]):
+        if not re.search(r"\s+TEMPLATE\s+", line):
+            if re.search(r"\s+WITH\s+", segment.text[0]):
                 logger.warning("Using non-template snippet with parameters: %s" % segment.text[0])
             return text
         line = segment.text[0]
         try:
-            if re.search("\\s+WITH\\s+", line):
+            if re.search(r"\s+WITH\s+", line):
                 local = self.get_local_parameters(line, segment)
                 return self.macro.format(text, local)
             return self.macro.format(text, {})
@@ -152,15 +168,18 @@ class SnippetWriter(SegmentHandler):
 
     def get_local_parameters(self, line, segment):
         local = {}
-        match = re.search("\\s+WITH\\s+(.*)$", line)
+        match = re.search(r"\s+WITH\s+(.*)$", line)
         line = match.group(1)
         while len(line) > 0:
             value_is_from_snippet = False
-            match = re.search("(\\w[\\w\\d_]*)\\s*=\\s*\"(.*?)\"\\s*(.*)$", line)
+            match = re.search(r'(\w[\w\d_]*)\s*=\s*"(.*?)"\s*(.*)$', line)
             if not match:
-                match = re.search("(\\w[\\w\\d_]*)\\s*=\\s*'(.*?)'\\s*(.*)$", line)
+                match = re.search(r"(\w[\w\d_]*)\s*=\s*'(.*?)'\s*(.*)$", line)
             if not match:
-                match = re.search("(\\w[\\w\\d_]*)\\s*->\\s*(?:'|\")(.*?)(?:'|\")\\s*(.*)$", line)
+                match = re.search(r"(\w[\w\d_]*)\s*->\s*'(.*?)'\s*(.*)$", line)
+                value_is_from_snippet = True
+            if not match:
+                match = re.search(r'(\w[\w\d_]*)\s*->\s*"(.*?)"\s*(.*)$', line)
                 value_is_from_snippet = True
             if match:
                 line = match.group(3)
@@ -231,11 +250,11 @@ class MdSnippetWriter(SnippetWriter):
     """
 
     def end(self):
-        return '```\\s*\n|END\\s+SNIPPET'
+        return r'```\s*\n|END\s+SNIPPET'
 
     # START SNIPPET MdSnippetWriter_handle
     def handle(self, pass_nr, segment: Segment):
-        if not re.search(".*\\.md$", segment.filename):
+        if not re.search(r".*\.md$", segment.filename):
             return
         startline = segment.text[0]
         match = re.search(SnippetWriter.start_line, startline)
