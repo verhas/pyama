@@ -182,7 +182,7 @@ optional arguments:
   -n, --dry             do not write the changes back to the files
   -b, --backup          create .BAK for changed files
   -f LOGFILE, --logfile LOGFILE
-                        create .BAK for changed files
+                        specify log file
 ```
 
 ## Precooked handlers
