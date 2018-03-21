@@ -8,7 +8,7 @@ from pyama.configuration import Configuration
 from pyama.linenumberer import LineNumberer
 from pyama.lineregexprocessor import LineRegexHandler
 from pyama.processor import Processor
-from pyama.snippet import SnippetWriter, SnippetReader, SnippetMacro
+from pyama.snippet import SnippetWriter, SnippetReader, SnippetMacro, MdSnippetWriter
 from pyama.snippet import reset as snippetreset
 from test.testsupport import copy_template, TARGET, assertEqual
 
@@ -24,6 +24,11 @@ class TestSnippets(unittest.TestCase):
         for file in glob("test_templates/*.ntmpl"):
             file = file.replace("\\", "/").replace(".ntmpl", "").replace("test_templates/", "")
             self.process_single_linenumberfile(file)
+
+    def test_simple_md_linernumberer_use(self):
+        for file in glob("test_templates/*.md_tmpl"):
+            file = file.replace("\\", "/").replace(".md_tmpl", "").replace("test_templates/", "")
+            self.process_single_linenumberfile_md(file)
 
     def test_simple_snippet_use(self):
         for file in glob("test_templates/*.tmpl"):
@@ -57,6 +62,17 @@ class TestSnippets(unittest.TestCase):
         processor = Processor(configs, TARGET + TEST + ".ptxt")
         processor.process()
         assertEqual(TEST, ext=".ptxt")
+        snippetreset()
+
+    def process_single_linenumberfile_md(self, TEST):
+        copy_template(TEST, ext=".md", template_ext=".md_tmpl")
+        TXT = Configuration() \
+            .file(TARGET + TEST + ".md") \
+            .handler(SnippetReader(), MdSnippetWriter(),LineNumberer())
+        configs = [TXT]
+        processor = Processor(configs, TARGET + TEST + ".md")
+        processor.process()
+        assertEqual(TEST, ext=".md")
         snippetreset()
 
     def process_single_linenumberfile(self, TEST):

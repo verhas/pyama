@@ -24,6 +24,18 @@ nine
 ten
 END SNIPPET
 
+USE SNIPPET ./snippet NUMBER LINES=3:7
+this is a snippet
+it contains
+1. several lines
+2. that will be
+3. numbered
+4. in various ways
+when used
+eight
+nine
+END SNIPPET
+
 USE SNIPPET ./snippet NUMBER STEP=2
  1. this is a snippet
  3. it contains

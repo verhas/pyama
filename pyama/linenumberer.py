@@ -20,33 +20,55 @@ class LineNumberer(SegmentHandler):
             return segment.text
         number_spec = match.group(1)
 
-        match = re.search(r"START\s*=(\d+)", number_spec)
+        match = re.search(r"START=(\d+)", number_spec)
         if match:
             line_number = int(match.group(1))
         else:
             line_number = 1
 
-        match = re.search(r"STEP\s*=(\d+)", number_spec)
+        match = re.search(r"STEP=(\d+)", number_spec)
         if match:
             step = int(match.group(1))
         else:
             step = 1
 
-        match = re.search(r"FORMAT\s*=\s*'([^']*)'", number_spec)
+        match = re.search(r"LINES=(-?\d*):(-?\d*)", number_spec)
+        if match:
+            if match.group(1):
+                start = int(match.group(1))
+            else:
+                start = 1
+            if match.group(2):
+                end = int(match.group(2))
+            else:
+                end = -1
+            lines = (start, end)
+        else:
+            lines = (1, -1)
+        if lines[0] < 0:
+            lines = (lines[0] + len(segment.text), lines[1])
+        if lines[1] < 0:
+            lines = (lines[0], lines[1] + len(segment.text))
+
+        lines = (min(lines[0], len(segment.text)), min(lines[1], len(segment.text)))
+
+        match = re.search(r"FORMAT='([^']*)'", number_spec)
         if not match:
-            match = re.search(r'FORMAT\s*=\s*"([^"]*)"', number_spec)
+            match = re.search(r'FORMAT="([^"]*)"', number_spec)
         if match:
             nr_format = match.group(1)
         else:
-            if line_number + (len(segment.text) - 2) * step <= 10:
+            if line_number + (lines[1] - lines[0]) * step <= 10:
                 nr_format = "{:d}. "
             else:
                 nr_format = "{:2d}. "
 
         # process the intermediate lines, not the first and the last
-        for i in range(1, len(segment.text) - 1):
+        i = lines[0]
+        while i < lines[1]:
             segment.text[i] = nr_format.format(line_number) + segment.text[i]
             line_number += step
+            i += 1
         return segment.text
 
     def handle(self, pass_nr, segment):
