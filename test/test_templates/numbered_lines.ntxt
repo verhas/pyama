@@ -1,0 +1,147 @@
+
+START SNIPPET snippet
+this is a snippet
+it contains
+several lines
+that will be
+numbered
+in various ways
+when used
+eight
+nine
+END SNIPPET
+
+START SNIPPET 10_line_snippet
+this is a snippet
+it contains
+several lines
+that will be
+numbered
+in various ways
+when used
+eight
+nine
+ten
+END SNIPPET
+
+USE SNIPPET ./snippet NUMBER STEP=2
+ 1. this is a snippet
+ 3. it contains
+ 5. several lines
+ 7. that will be
+ 9. numbered
+11. in various ways
+13. when used
+15. eight
+17. nine
+END SNIPPET
+
+this will already be two chars
+USE SNIPPET ./10_line_snippet NUMBER
+ 1. this is a snippet
+ 2. it contains
+ 3. several lines
+ 4. that will be
+ 5. numbered
+ 6. in various ways
+ 7. when used
+ 8. eight
+ 9. nine
+10. ten
+END SNIPPET
+
+here we will have single digits
+USE SNIPPET ./snippet NUMBER
+1. this is a snippet
+2. it contains
+3. several lines
+4. that will be
+5. numbered
+6. in various ways
+7. when used
+8. eight
+9. nine
+END SNIPPET
+
+START SNIPPET long_snip
+01 this is a snippet
+02 it contains
+03 several lines
+04 that will be
+05 numbered
+06 in various ways
+07 when used
+08 eight
+09 nine
+11 this is a snippet
+12 it contains
+13 several lines
+14 that will be
+15 numbered
+16 in various ways
+17 when used
+18 eight
+19 nine
+END SNIPPET
+
+here we will have two character by default with space at the start
+USE SNIPPET ./long_snip NUMBER
+ 1. 01 this is a snippet
+ 2. 02 it contains
+ 3. 03 several lines
+ 4. 04 that will be
+ 5. 05 numbered
+ 6. 06 in various ways
+ 7. 07 when used
+ 8. 08 eight
+ 9. 09 nine
+10. 11 this is a snippet
+11. 12 it contains
+12. 13 several lines
+13. 14 that will be
+14. 15 numbered
+15. 16 in various ways
+16. 17 when used
+17. 18 eight
+18. 19 nine
+END SNIPPET
+
+here we have two character digits
+USE SNIPPET ./snippet NUMBER START=6
+ 6. this is a snippet
+ 7. it contains
+ 8. several lines
+ 9. that will be
+10. numbered
+11. in various ways
+12. when used
+13. eight
+14. nine
+END SNIPPET
+
+USE SNIPPET ./snippet NUMBER FORMAT="{:>12d}. "
+           1. this is a snippet
+           2. it contains
+           3. several lines
+           4. that will be
+           5. numbered
+           6. in various ways
+           7. when used
+           8. eight
+           9. nine
+END SNIPPET
+
+USE SNIPPET ./snippet NUMBER FORMAT="{0:02X}: " START=9 STEP=2
+09: this is a snippet
+0B: it contains
+0D: several lines
+0F: that will be
+11: numbered
+13: in various ways
+15: when used
+17: eight
+19: nine
+END SNIPPET
+
+text after the snippet use, remains intact
+

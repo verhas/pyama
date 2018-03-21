@@ -35,7 +35,7 @@ class ShellSnippet(SegmentHandler):
             exec.append(line.rstrip())
         try:
             text = subprocess.check_output(exec, shell=False).decode("utf-8")
-            text = re.split("(\n)",text.replace('\r',''))
+            text = re.split("(\n)", text.replace('\r', ''))
             store_snippet(segment.filename, segment.name, segment.text[0:1] + text + [segment.text[-1]])
         except:
             logger.error("Can not execute '%s'" % ' '.join(exec))

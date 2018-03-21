@@ -229,49 +229,6 @@ class SnippetWriter(SegmentHandler):
         else:
             return text
 
-    def postprocess(self, segment, text):
-        """ postprocess the lines in case there is any REPLACE command on the first line"""
-        match = re.search(r"REPLACE\s+'([^']*)'\s*->\s*'([^']*)'", segment.text[0])
-        if not match:
-            match = re.search(r'REPLACE\s+"([^"]*)"\s*->\s*"([^"]*)"', segment.text[0])
-        if not match:
-            return text
-        search = match.group(1)
-        replace = match.group(2)
-        # process the intermediate lines, not the first and the last
-        for i in range(1, len(text) - 1):
-            text[i] = re.sub(search, replace, text[i])
-        # save the user shooting the foot
-        # may accidentally remove the new-line characters, but even then the last line has to have a new line
-        if text[-2][-1] != "\n":
-            text[-2] = text[-2] + "\n"
-        return text
-
-    def line_numbering(self, segment, text):
-        """ postprocess the lines in case there is any REPLACE command on the first line"""
-        match = re.search(r"NUMBER\s+(.*)", segment.text[0])
-        if not match:
-            return text
-        number_spec = match.group(1)
-        match = re.search(r"START\s*=(\d+)",number_spec)
-        if match:
-            line_number = int(match.group(1))
-        else:
-            line_number = 1
-        match = re.search(r"FORMAT\s*=\s*'([^']*)'",number_spec)
-        if not match:
-            match = re.search(r'FORMAT\s*=\s*"([^"]*)"',number_spec)
-        if match:
-            nr_format = match.group(1)
-        else:
-            nr_format = "{:d}. "
-
-        # process the intermediate lines, not the first and the last
-        for i in range(1, len(text) - 1):
-            text[i] = nr_format.format(line_number)+ text[i]
-            line_number += 1
-        return text
-
     # START SNIPPET SnippetWriter_handle
     def handle(self, pass_nr, segment):
         startline = segment.text[0]
@@ -282,8 +239,6 @@ class SnippetWriter(SegmentHandler):
         if not text:
             return
         text = self.chomp(text, False)
-        text = self.line_numbering(segment,text)
-        text = self.postprocess(segment, text)
         segment.text = [segment.text[0]] + text[1:-1] + [segment.text[-1]]
         segment.modified = True
     # END SNIPPET
@@ -314,8 +269,6 @@ class MdSnippetWriter(SnippetWriter):
             logger.warning("segment %s/%s is too short, cannot be processed" % (segment.filename, segment.name))
         else:
             text = self.chomp(text, False)
-            text = self.line_numbering(segment, text)
-            text = self.postprocess(text)
             segment.text = [segment.text[0], segment.text[1]] + \
                            text[1:-1] + \
                            [segment.text[-1]]

@@ -1,9 +1,9 @@
-from pyama.segmenthandler import SegmentHandler
-from pyama.file import Segment
-import re
 import logging
+import re
+
+from pyama.file import Segment
+from pyama.segmenthandler import SegmentHandler
 from pyama.template import SnippetFormatter
-from pyama.snippet import SnippetMacro
 
 logger = logging.getLogger("pyama.javahandler.JavaHandler")
 
@@ -125,8 +125,8 @@ class JavaHandler(SegmentHandler):
 }        }}
         """)
         end_start = self.find_start(segment)
-        segment.text = segment.text[0:1]+ \
-                       text[0:1] +\
+        segment.text = segment.text[0:1] + \
+                       text[0:1] + \
                        segment.text[2:end_start] + \
                        text[1:] + \
                        segment.text[len(segment.text) - 1:len(segment.text)]

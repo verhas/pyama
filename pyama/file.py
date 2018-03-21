@@ -10,7 +10,7 @@ class Segment:
         # END SNIPPET
 
     def __str__(self):
-        return "[Segment %s/%s %s]" % (self.filename, self.name , "(m)" if self.modified else "")
+        return "[Segment %s/%s %s]" % (self.filename, self.name, "(m)" if self.modified else "")
 
     def add(self, line):
         self.text.append(line)

@@ -1,6 +1,7 @@
-from pyama.file import Segment, File
-import re
 import logging
+import re
+
+from pyama.file import Segment, File
 
 logger = logging.getLogger(__name__)
 

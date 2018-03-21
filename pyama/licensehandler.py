@@ -1,6 +1,7 @@
-from pyama.segmenthandler import SegmentHandler
-import re
 import logging
+import re
+
+from pyama.segmenthandler import SegmentHandler
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +78,8 @@ class LicenseHandler(SegmentHandler):
         if license_found:
             logging.info("old license was found starting on line %d" % first_license_line)
             last_license_line = first_license_line
-            while last_license_line < len(segment.text) and re.search(prefixes['matcher'], segment.text[last_license_line]):
+            while last_license_line < len(segment.text) and re.search(prefixes['matcher'],
+                                                                      segment.text[last_license_line]):
                 last_license_line += 1
             if last_license_line == len(segment.text):
                 last_license_line -= 1

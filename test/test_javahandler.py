@@ -1,12 +1,13 @@
 #! /usr/bin/python
 # -*- coding: utf8 -*-
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
-from pyama.configuration import Configuration
-from pyama.processor import Processor
-from pyama.javahandler import JavaHandler
-from test.testsupport import copy_template, TARGET, assertEqual
-from glob import glob
 import unittest
+from glob import glob
+
+from pyama.configuration import Configuration
+from pyama.javahandler import JavaHandler
+from pyama.processor import Processor
+from test.testsupport import copy_template, TARGET, assertEqual
 
 
 class TestJavahandler(unittest.TestCase):
@@ -16,14 +17,14 @@ class TestJavahandler(unittest.TestCase):
             self.process_single_file(file)
 
     def process_single_file(self, TEST):
-        copy_template(TEST,ext=".java", template_ext=".java_x")
-        JAVA = Configuration()\
+        copy_template(TEST, ext=".java", template_ext=".java_x")
+        JAVA = Configuration() \
             .file(TARGET + TEST + ".java") \
             .handler(JavaHandler())
         configs = [JAVA]
         processor = Processor(configs, TARGET + TEST + ".java")
         processor.process()
-        assertEqual(TEST,ext=".java")
+        assertEqual(TEST, ext=".java")
 
 
 if __name__ == '__main__':

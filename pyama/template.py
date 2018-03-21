@@ -1,5 +1,5 @@
-import string
 import re
+import string
 
 
 def filter_empty(text):
