@@ -10,7 +10,7 @@ NUMBER
 It also processes two arguments of the form
 
 ```bash
-NUMBER START=1 STEP=1 FORMAT="{:d}. "
+NUMBER START=1 STEP=1 FORMAT="{:d}. LINES=n:m"
 ```
 
 Both `START` and `FORMAT` are optional.
@@ -34,6 +34,19 @@ The format string should be enclosed between
 `"` or `'` (double or single quote) characters. The format string is used through the
 standard Python string `format()` method. For the various possibilities see 
 [the Python documentation](https://docs.python.org/3.4/library/string.html#grammar-token-format_spec).
+
+Using `LINES` you can define start and end line that is numbered. The other lines will
+not be numbered. The numbers `n` and `m` can be positive or negative. If any of it is negative then
+it is an index from the end of the lines. This is indexing the same style as Python uses indices.
+If either `m` or `n` is missing the default value will be the first and the last line
+respectively. Specifying `LINES=:` is the same as not specifying any `LINES` parameter. The
+second parameter `m` is the index of the line that is already not numbered. In other words
+lines with index `i` for which `n` <= `i` < `m` stands.
+
+The `LINES` parameter is usually used together with the markdown snippet writer where the second
+line of the snippet is starting the code sample and remains intact. This should also be
+followed by the numbering if used. In this case the parameter `LINE=2:` will
+protect the line that starts the code display starting. 
 
 The line numbering handler is usually used together with the snippet handler
 using the format
