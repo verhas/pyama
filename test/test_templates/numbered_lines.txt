@@ -1,0 +1,44 @@
+
+START SNIPPET snippet
+this is a snippet
+it contains
+several lines
+that will be
+numbered
+in various ways
+when used
+END SNIPPET
+
+
+USE SNIPPET ./snippet NUMBER START=13
+13. this is a snippet
+14. it contains
+15. several lines
+16. that will be
+17. numbered
+18. in various ways
+19. when used
+END SNIPPET
+
+USE SNIPPET ./snippet NUMBER FORMAT="{:>12d}. "
+           1. this is a snippet
+           2. it contains
+           3. several lines
+           4. that will be
+           5. numbered
+           6. in various ways
+           7. when used
+END SNIPPET
+
+USE SNIPPET ./snippet NUMBER FORMAT="{0:02X}: " START=9
+09: this is a snippet
+0A: it contains
+0B: several lines
+0C: that will be
+0D: numbered
+0E: in various ways
+0F: when used
+END SNIPPET
+
+text after the snippet use, remains intact
+

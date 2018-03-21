@@ -1,0 +1,38 @@
+
+START SNIPPET first_snippet TEMPLATE
+this is the content of the first """{snippet}""" no new line, truncated
+it has multiple lines
+END SNIPPET
+
+START SNIPPET second
+one e e e e
+END SNIPPET
+
+USE SNIPPET ./second REPLACE "\s+" -> ""
+END SNIPPET
+
+USE SNIPPET ./second REPLACE "\s+" -> "+"
+END SNIPPET
+
+This is free text out of snippet
+
+USE SNIPPET ./first_snippet WITH snippet->'./parameter_snippet' REPLACE "\s+" -> ""
+this is the conhahshakn
+fasdfasd
+as
+
+garbaseereee
+END SNIPPET
+
+USE SNIPPET ./first_snippet WITH snippet->'./parameter_snippet' REPLACE "\s+" -> "+"
+this is the conhahshakn
+fasdfasd
+as
+
+garbaseereee
+END SNIPPET
+text after the snippet use, remains intact
+
+START SNIPPET parameter_snippet TRUNCATE
+snippet from parameter\
+END SNIPPET
