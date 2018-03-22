@@ -4,14 +4,14 @@ from pyama.segmenthandler import SegmentHandler
 
 
 class LineNumberer(SegmentHandler):
-    def __init__(self, runpass=3):
+    def __init__(self, runpass=[3]):
         self.runpass = runpass
 
     def passes(self):
         '''
         :return: snippet references are modified when all snippets are already in memory
         '''
-        return [self.runpass]
+        return self.runpass
 
     def line_numbering(self, segment):
         """ postprocess the lines in case there is any REPLACE command on the first line"""

@@ -6,7 +6,7 @@ from glob import glob
 
 from pyama.configuration import Configuration
 from pyama.linenumberer import LineNumberer
-from pyama.lineregexprocessor import LineRegexHandler
+from pyama.regexhandler import RegexHandler
 from pyama.processor import Processor
 from pyama.snippet import SnippetWriter, SnippetReader, SnippetMacro, MdSnippetWriter
 from pyama.snippet import reset as snippetreset
@@ -57,7 +57,7 @@ class TestSnippets(unittest.TestCase):
         copy_template(TEST, ext=".ptxt", template_ext=".ptmpl")
         TXT = Configuration() \
             .file(TARGET + TEST + ".ptxt") \
-            .handler(SnippetReader(), SnippetWriter(), LineRegexHandler())
+            .handler(SnippetReader(), SnippetWriter(), RegexHandler(), LineNumberer([4]))
         configs = [TXT]
         processor = Processor(configs, TARGET + TEST + ".ptxt")
         processor.process()

@@ -239,8 +239,6 @@ to `True`.
 [//]: # (USE SNIPPET */MdSnippetWriter_handle)
 ```python
     def handle(self, pass_nr, segment: Segment):
-        if not re.search(r".*\.md$", segment.filename):
-            return
         startline = segment.text[0]
         match = re.search(SnippetWriter.start_line, startline)
         if not match:

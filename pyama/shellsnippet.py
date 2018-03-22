@@ -9,8 +9,24 @@ from pyama.snippet import store_snippet
 logger = logging.getLogger(__name__)
 
 
-class ShellSnippet(SegmentHandler):
-    start_line = r'EXECUTE FOR SNIPPET\s+(\w[\w\d_]*)'
+class ShellHander(SegmentHandler):
+    def init_exec(self):
+        if sys.platform.startswith("win"):
+            return ["cmd.exe", "/C"]
+        else:
+            return []
+
+    def execute(self, exec):
+        try:
+            text = subprocess.check_output(exec, shell=False).decode("utf-8")
+            return re.split("(\n)", text.replace('\r', ''))
+        except:
+            logger.error("Can not execute '%s'" % ' '.join(exec))
+            return None
+
+
+class ShellSnippet(ShellHander):
+    start_line = r'EXECUTE\s+FOR\s+SNIPPET\s+(\w[\w\d_]*)'
 
     def passes(self):
         '''
@@ -27,15 +43,10 @@ class ShellSnippet(SegmentHandler):
     def handle(self, pass_nr, segment):
         if not re.search(ShellSnippet.start_line, segment.text[0]):
             return
-        if sys.platform.startswith("win"):
-            exec = ["cmd.exe", "/C"]
-        else:
-            exec = []
-        for line in segment.text[1:-1]:
-            exec.append(line.rstrip())
-        try:
-            text = subprocess.check_output(exec, shell=False).decode("utf-8")
-            text = re.split("(\n)", text.replace('\r', ''))
-            store_snippet(segment.filename, segment.name, segment.text[0:1] + text + [segment.text[-1]])
-        except:
-            logger.error("Can not execute '%s'" % ' '.join(exec))
+
+        exec = self.init_exec()
+
+        for line in segment.text[1:-1]: exec.append(line.rstrip())
+
+        text = self.execute(exec)
+        if text: store_snippet(segment.filename, segment.name, segment.text[0:1] + text + [segment.text[-1]])

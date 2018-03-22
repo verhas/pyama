@@ -16,6 +16,36 @@ USE SNIPPET ./second REPLACE "\s+" -> "+"
 one+e+e+e+e+
 END SNIPPET
 
+numbering and regilar expression handler can be used together to keep numbering
+in the source code
+in this case the regular expression handler runs in the 3rd pass and
+line numbering is explicitely configured to run in the 4th pass
+
+START SNIPPET numbered NUMBER START=10 STEP=10 FORMAT=" {:2d} " REPLACE "^\s*\d+\s*" -> ""
+ 10 this way we
+ 20 can renumber
+ 30 even if we inserted lines or the numbering
+ 40 the lines
+ 50 is totally got wrong...
+END SNIPPET
+
+
+it will first replace the {snippet} with the string DELETE THIS and in the next pass
+it will kill the line afterwards exactly because of this
+
+USE SNIPPET ./first_snippet REPLACE "\s+" -> "+" KILL "DELETE THIS" WITH snippet='DELETE THIS'
+it+has+multiple+lines+
+END SNIPPET
+
+
+USE SNIPPET ./first_snippet REPLACE "\s+" -> "+" KILL "UNDEFINED|multiple"
+END SNIPPET
+
+WITH is defined with a snippet that does not exist
+USE SNIPPET ./first_snippet REPLACE "\s+" -> "+" KILL "DELETE THIS" WITH snippet -> 'somethng'
+this+is+the+content+of+the+first+"""{UNDEFINED:snippet}"""+no+new+line,+truncated+it+has+multiple+lines+
+END SNIPPET
+
 This is free text out of snippet
 
 USE SNIPPET ./first_snippet WITH snippet->'./parameter_snippet' REPLACE "\s+" -> ""

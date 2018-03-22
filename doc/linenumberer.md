@@ -55,10 +55,11 @@ using the format
 USE SNIPPET */whatever_my_snippet NUMBER START=1 STEP=1 FORMAT="{:d}. "
 ```
 
-to insert the numbering 
+to insert the numbering.
 
 The line numbering handler runs by default during the third pass ensuring that the
 snippet using segments were already overwritten with the lines of the snippets. If
 you use other handlers and you want to run the handler in a different pass then
 use the optional argument `runpass` when creating the handler instance in the
-configuration code. 
+configuration code. The value to `runpass` is the list of the passes in which
+the handler has to be invoked.

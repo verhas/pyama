@@ -108,8 +108,12 @@ class SnippetWriter(SegmentHandler):
     # out out segment.
     start_line = r'USE\s+SNIPPET(.{0})\s+([\w\d_/\.\*]+)'
 
+    def no_warning(self, string):
+        self.warning_exclude = string
+
     def __init__(self):
         self.macro = SnippetMacro()
+        self.warning_exclude = ""
 
     def passes(self):
         '''
@@ -130,7 +134,58 @@ class SnippetWriter(SegmentHandler):
             return None
         file = match.group(1)
         snippet = match.group(2)
-        return self.get_snippet_text(file, snippet, segment, process)
+        text = self.get_snippet_text(file, snippet, segment, process)
+        if text:
+            text = self.skip_lines(segment, text)
+        return text
+
+## TODO move this functionality to a separate handler
+    def skip_lines(self, segment, text):
+        if re.search("FULL", segment.text[0]):
+            i = 1
+            while i < len(text) - 1:
+                if re.search(r"SNIPPET\s+SKIP\s+TILL\s+('|\").*?\1", text[i]) or \
+                        re.search(r"SNIPPET\s+SKIP\s+(\d+)\s+LINES", text[i]):
+                    text = text[:i] + text[i + 1:]
+                else:
+                    i += 1
+            return text
+        else:
+            i = 1
+            skipping = False
+            skip_stop = None
+            skip_lines = 0
+            while i < len(text) - 1:
+                if skipping:
+                    if skip_lines > 0:
+                        skip_lines -= 1
+                        text = text[:i] + text[i + 1:]
+                        if skip_lines == 0:
+                            skipping = False
+                        continue
+                    if re.search(skip_stop, text[i]):
+                        skipping = False
+                        skip_stop = None
+                        continue
+                    else:
+                        text = text[:i] + text[i + 1:]
+                        continue
+                else:
+                    match = re.search(r"SNIPPET\s+SKIP\s+TILL\s+('|\")(.*?)\1", text[i])
+                    if match:
+                        skip_stop = match.group(2)
+                        text = text[:i] + text[i + 1:]
+                        skipping = True
+                        continue
+                    match = re.search(r"SNIPPET\s+SKIP\s+(\d+)\s+LINES", text[i])
+                    if match:
+                        skip_lines = int(match.group(1))
+                        text = text[:i] + text[i + 1:]
+                        skipping = True
+                        continue
+                    i += 1
+
+        return text
 
     def get_snippet_text(self, file, snippet, segment, process=True):
         if file == '*':
@@ -140,7 +195,9 @@ class SnippetWriter(SegmentHandler):
                 file = segment.filename
             text = file in snippets and snippet in snippets[file] and snippets[file][snippet][:]
         if not text:
-            logger.warning("snippet %s/%s is not defined" % (file, snippet))
+            msg = "snippet %s/%s is not defined" % (file, snippet)
+            if msg not in self.warning_exclude:
+                logger.warning(msg)
             return False
         logger.debug("snippet %s/%s is %s" % (file, snippet, text))
         if process:
@@ -185,13 +242,17 @@ class SnippetWriter(SegmentHandler):
                 value_is_from_snippet = True
             if match:
                 line = match.group(3)
+                key = match.group(1)
                 if value_is_from_snippet:
                     text = self.get_modified_text(match.group(2), segment, process=False)
-                    text = self.chomp(text)
-                    value = "".join(text[1:-1])
+                    if text is not None:
+                        text = self.chomp(text)
+                        value = "".join(text[1:-1])
+                    else:
+                        value = "{UNDEFINED:%s}" % key
                 else:
                     value = match.group(2)
-                local[match.group(1)] = value
+                local[key] = value
             else:
                 break
         return local
@@ -208,7 +269,9 @@ class SnippetWriter(SegmentHandler):
                     text = found
                 found_nr += 1
         if found_nr == 0:
-            logger.warning("undefined snippet %s is used" % snippet)
+            msg = "undefined snippet %s is used" % snippet
+            if msg not in self.warning_exclude:
+                logger.warning(msg)
         if found_nr > 1:
             logger.warning("used snippet %s is defined in multiple files" % snippet)
         return text
@@ -218,7 +281,7 @@ class SnippetWriter(SegmentHandler):
         if not re.search("TRUNCATE", text[0]):
             return text
         if len(text) < 2:
-            logger.warning("segment %s is too short to trunace the last line " % text[0])
+            logger.warning("segment %s is too short to truncate the last line " % text[0])
         if len(text[-2]) > 1 and text[-2][-1] == '\n' and text[-2][-2] == '\\':
             chomped = [s for s in text]
             if inline:
@@ -256,8 +319,6 @@ class MdSnippetWriter(SnippetWriter):
 
     # START SNIPPET MdSnippetWriter_handle
     def handle(self, pass_nr, segment: Segment):
-        if not re.search(r".*\.md$", segment.filename):
-            return
         startline = segment.text[0]
         match = re.search(SnippetWriter.start_line, startline)
         if not match:

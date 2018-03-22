@@ -53,13 +53,14 @@ you can have some sample code like the following:
 [//]: # (USE SNIPPET run.py/run_py)
 ```python
 from pyama.configuration import Configuration
-from pyama.snippet import MdSnippetWriter, SnippetReader, SnippetMacro
-from pyama.shellsnippet import ShellSnippet
 from pyama.processor import Processor
+from pyama.shellsnippet import ShellSnippet
+from pyama.snippet import MdSnippetWriter, SnippetReader, SnippetMacro
 
-MD = Configuration().file(r".*\.md$").handler(MdSnippetWriter(),SnippetReader())
+snippetWriter = MdSnippetWriter()
+MD = Configuration().file(r".*\.md$").handler(snippetWriter, SnippetReader())
 PY = Configuration().file(r".*\.py$").handler(SnippetReader(), ShellSnippet())
-JAVA = Configuration().file(r".*\.java$").handler(SnippetReader(),SnippetMacro())
+JAVA = Configuration().file(r".*\.java$").handler(SnippetReader(), SnippetMacro())
 configs = [MD, PY, JAVA]
 
 Processor(configs, "**/*.*").process()
@@ -190,17 +191,23 @@ optional arguments:
 Pyama comes with an ever-expanding list of pre-cooked handlers. These are
 
 * [snippet handler](./doc/snippet.md) can recognize code snippets in program source files
-and can copy these into documentation files (especially into markdown files)
+  and can copy these into documentation files (especially into markdown files)
 
 * [shell snippet handler](./doc/shellsnippet.md) can executes external program and
-use the output of the code as snippet
+  use the output of the code as snippet
 
 * [javahandler](./doc/javahandler.md) can create constructors, setters, getters, `equals`
-and `hashCode` methods as well as `toString` and nested builder class in Java classes.
+  and `hashCode` methods as well as `toString` and nested builder class in Java classes.
 
 * [licensehandler](./doc/licensehandler.md) can check that each file has a license text
-at the start of it and inserts the license text if it was not there or updates the text
-if it changed in a separate sample license file
+  at the start of it and inserts the license text if it was not there or updates the text
+  if it changed in a separate sample license file
+
+* [linenumberer](./doc/linenumberer.md) can put line numbers on lines in snippets
+ 
+* [regexhandler](./doc/regexhandler.md) can execute regukar expression search and replace on
+  snippet lines 
+
 
 ## More documentation
 

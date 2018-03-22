@@ -18,13 +18,14 @@ Let's copy here the file `run.py` of this project:
 [//]: # (USE SNIPPET run.py/run_py)
 ```python
 from pyama.configuration import Configuration
-from pyama.snippet import MdSnippetWriter, SnippetReader, SnippetMacro
-from pyama.shellsnippet import ShellSnippet
 from pyama.processor import Processor
+from pyama.shellsnippet import ShellSnippet
+from pyama.snippet import MdSnippetWriter, SnippetReader, SnippetMacro
 
-MD = Configuration().file(r".*\.md$").handler(MdSnippetWriter(),SnippetReader())
+snippetWriter = MdSnippetWriter()
+MD = Configuration().file(r".*\.md$").handler(snippetWriter, SnippetReader())
 PY = Configuration().file(r".*\.py$").handler(SnippetReader(), ShellSnippet())
-JAVA = Configuration().file(r".*\.java$").handler(SnippetReader(),SnippetMacro())
+JAVA = Configuration().file(r".*\.java$").handler(SnippetReader(), SnippetMacro())
 configs = [MD, PY, JAVA]
 
 Processor(configs, "**/*.*").process()

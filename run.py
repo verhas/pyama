@@ -7,7 +7,19 @@ from pyama.processor import Processor
 from pyama.shellsnippet import ShellSnippet
 from pyama.snippet import MdSnippetWriter, SnippetReader, SnippetMacro
 
-MD = Configuration().file(r".*\.md$").handler(MdSnippetWriter(), SnippetReader())
+snippetWriter = MdSnippetWriter()
+# SNIPPET SKIP TILL "^MD"
+snippetWriter.no_warning("""
+WARNING:pyama.snippet:snippet filename/snippetname is not defined
+WARNING:pyama.snippet:snippet filename/snippetname is not defined
+WARNING:pyama.snippet:snippet doc/snippet.md/xetters is not defined
+WARNING:pyama.snippet:undefined snippet license_handler is used
+WARNING:pyama.snippet:snippet */license_handler is not defined
+WARNING:pyama.snippet:snippet run.py/run__py is not defined
+WARNING:pyama.snippet:undefined snippet whatever_my_snippet is used
+WARNING:pyama.snippet:snippet */whatever_my_snippet is not defined
+""")
+MD = Configuration().file(r".*\.md$").handler(snippetWriter, SnippetReader())
 PY = Configuration().file(r".*\.py$").handler(SnippetReader(), ShellSnippet())
 JAVA = Configuration().file(r".*\.java$").handler(SnippetReader(), SnippetMacro())
 configs = [MD, PY, JAVA]

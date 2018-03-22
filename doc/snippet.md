@@ -85,21 +85,6 @@ Note, however, that the starting back-ticks SHOULD be followed by the syntax typ
 help Pyama to distinguish it from the snippet ends. For examples, please
 look at the raw display of the [README.md](../README.md) file.
 
-## Postprocessing lines
-
-It is possible to modify the lines of a snippet at the place of use. On the starting line
-you can specify a search and replace regular expression. For example the following
-snippet use will insert the text of the snippet replacing all space with a dot.
-
-```bash
-USE SNIPPET doc/snippet.md/main_java REPLACE "\s" -> "."
-```
-
-The regular expression before the `->` sign as well as the replacement string after it
-should be enclosed between `"` or `'` characters (double or single quotes). You should
-use the same quotes for both. In the replacement string you can use `\1`, `\2` and so on
-to reference capture groups in the regular expression.
-
 ## TRUNCATE new line from the segment
 
 In some cases, you want a snippet, when used be part of a line. But segments start with
@@ -254,13 +239,14 @@ those file segments that belong to files they are configured for.
 [//]: # (USE SNIPPET run.py/run_py)
 ```python
 from pyama.configuration import Configuration
-from pyama.snippet import MdSnippetWriter, SnippetReader, SnippetMacro
-from pyama.shellsnippet import ShellSnippet
 from pyama.processor import Processor
+from pyama.shellsnippet import ShellSnippet
+from pyama.snippet import MdSnippetWriter, SnippetReader, SnippetMacro
 
-MD = Configuration().file(r".*\.md$").handler(MdSnippetWriter(),SnippetReader())
+snippetWriter = MdSnippetWriter()
+MD = Configuration().file(r".*\.md$").handler(snippetWriter, SnippetReader())
 PY = Configuration().file(r".*\.py$").handler(SnippetReader(), ShellSnippet())
-JAVA = Configuration().file(r".*\.java$").handler(SnippetReader(),SnippetMacro())
+JAVA = Configuration().file(r".*\.java$").handler(SnippetReader(), SnippetMacro())
 configs = [MD, PY, JAVA]
 
 Processor(configs, "**/*.*").process()
