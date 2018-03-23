@@ -134,58 +134,7 @@ class SnippetWriter(SegmentHandler):
             return None
         file = match.group(1)
         snippet = match.group(2)
-        text = self.get_snippet_text(file, snippet, segment, process)
-        if text:
-            text = self.skip_lines(segment, text)
-        return text
-
-## TODO move this functionality to a separate handler
-    def skip_lines(self, segment, text):
-        if re.search("FULL", segment.text[0]):
-            i = 1
-            while i < len(text) - 1:
-                if re.search(r"SNIPPET\s+SKIP\s+TILL\s+('|\").*?\1", text[i]) or \
-                        re.search(r"SNIPPET\s+SKIP\s+(\d+)\s+LINES", text[i]):
-                    text = text[:i] + text[i + 1:]
-                else:
-                    i += 1
-            return text
-        else:
-            i = 1
-            skipping = False
-            skip_stop = None
-            skip_lines = 0
-            while i < len(text) - 1:
-                if skipping:
-                    if skip_lines > 0:
-                        skip_lines -= 1
-                        text = text[:i] + text[i + 1:]
-                        if skip_lines == 0:
-                            skipping = False
-                        continue
-                    if re.search(skip_stop, text[i]):
-                        skipping = False
-                        skip_stop = None
-                        continue
-                    else:
-                        text = text[:i] + text[i + 1:]
-                        continue
-                else:
-                    match = re.search(r"SNIPPET\s+SKIP\s+TILL\s+('|\")(.*?)\1", text[i])
-                    if match:
-                        skip_stop = match.group(2)
-                        text = text[:i] + text[i + 1:]
-                        skipping = True
-                        continue
-                    match = re.search(r"SNIPPET\s+SKIP\s+(\d+)\s+LINES", text[i])
-                    if match:
-                        skip_lines = int(match.group(1))
-                        text = text[:i] + text[i + 1:]
-                        skipping = True
-                        continue
-                    i += 1
-
-        return text
+        return self.get_snippet_text(file, snippet, segment, process)
 
     def get_snippet_text(self, file, snippet, segment, process=True):
         if file == '*':

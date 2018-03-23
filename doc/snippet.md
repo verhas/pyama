@@ -221,7 +221,7 @@ copy/pasting the documentation templating is used.
 
 ## Configuration
 
-To use the snippet handler you can configure it as you can see in `run.py` in 
+To use the snippet handler you can configure it as you can see in `pyama.py` in 
 this project. The markdown documentation of this project is maintained using
 Pyama.
 
@@ -236,15 +236,16 @@ and segments them using the start and end lines provided by he handlers that are
 configured for that extension. When the handlers are invoked they only get
 those file segments that belong to files they are configured for. 
 
-[//]: # (USE SNIPPET run.py/run_py)
+[//]: # (USE SNIPPET pyama.py/run_py SKIPPER)
 ```python
 from pyama.configuration import Configuration
 from pyama.processor import Processor
 from pyama.shellsnippet import ShellSnippet
 from pyama.snippet import MdSnippetWriter, SnippetReader, SnippetMacro
+from pyama.lineskipperhandler import LineSkipper
 
 snippetWriter = MdSnippetWriter()
-MD = Configuration().file(r".*\.md$").handler(snippetWriter, SnippetReader())
+MD = Configuration().file(r".*\.md$").handler(snippetWriter, SnippetReader(),LineSkipper())
 PY = Configuration().file(r".*\.py$").handler(SnippetReader(), ShellSnippet())
 JAVA = Configuration().file(r".*\.java$").handler(SnippetReader(), SnippetMacro())
 configs = [MD, PY, JAVA]

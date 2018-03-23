@@ -50,15 +50,16 @@ Another issue I faced during my practice is that most of the markup languages do
 allow to include a snippet from other source files. For example, using markdown
 you can have some sample code like the following:
 
-[//]: # (USE SNIPPET run.py/run_py)
+[//]: # (USE SNIPPET pyama.py/run_py SKIPPER)
 ```python
 from pyama.configuration import Configuration
 from pyama.processor import Processor
 from pyama.shellsnippet import ShellSnippet
 from pyama.snippet import MdSnippetWriter, SnippetReader, SnippetMacro
+from pyama.lineskipperhandler import LineSkipper
 
 snippetWriter = MdSnippetWriter()
-MD = Configuration().file(r".*\.md$").handler(snippetWriter, SnippetReader())
+MD = Configuration().file(r".*\.md$").handler(snippetWriter, SnippetReader(),LineSkipper())
 PY = Configuration().file(r".*\.py$").handler(SnippetReader(), ShellSnippet())
 JAVA = Configuration().file(r".*\.java$").handler(SnippetReader(), SnippetMacro())
 configs = [MD, PY, JAVA]
@@ -120,9 +121,9 @@ This structure is very general and the specific tasks are implemented in the han
 
 ## Use of Pyama
 
-Typically you will install Pyama into your development environment and you create a `run.py`
+Typically you will install Pyama into your development environment and you create a `pyama.py`
 file in your development root directory. You can name it any way you want btw. It will
-be an extremely simple Python source file. The actual `run.py` of this project you can
+be an extremely simple Python source file. The actual `pyama.py` of this project you can
 see above.
 
 Yes, it was copied into this markdown file using Pyama. This little program declares the
@@ -159,21 +160,21 @@ be available in a python dictionary.
 Similarly, snippet segments in the markdown files start with 
 
 ```
-[//]: # (USE SNIPPET run.py/run__py)
+[//]: # (USE SNIPPET pyama.py/run__py)
 ```
 
 and ends with a line that contains only three backticks. The keywords `USE SNIPPET` tell
-Pyama to start a new segment and the `run.py/run_py` tells the segment handler
+Pyama to start a new segment and the `pyama.py/run_py` tells the segment handler
 `MdSnippetWriter` that it has to replace the content of the segment as it is now
-to the snippet that came from the file `run.py` and is named `run_py`. (Note that in the
+to the snippet that came from the file `pyama.py` and is named `run_py`. (Note that in the
 sample above I had to replace `run_py` with `run__py` otherwise Pyama was recognizing
 it as something it should process.)
 
 ## Command line options
 
-[//]: # (USE SNIPPET run.py/run_output)
+[//]: # (USE SNIPPET pyama.py/run_output)
 ```bash
-usage: run.py [-h] [-l LEVEL] [-n] [-b] [-f LOGFILE]
+usage: pyama.py [-h] [-l LEVEL] [-n] [-b] [-f LOGFILE]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -213,7 +214,7 @@ Pyama comes with an ever-expanding list of pre-cooked handlers. These are
 
 If you have the segment handlers and can run python code and you are satisfied then
 there is no point to read on. The application can be installed with minimal python
-infrastructure knowledge and the `run.py` can easily be created without really
+infrastructure knowledge and the `pyama.py` can easily be created without really
 understanding python.
 
 However, if you need something that is not available and you want to write segment handler(s)

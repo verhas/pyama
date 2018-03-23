@@ -8,22 +8,23 @@ to be understood.
 ## Files
 
 Pyama collects a list of files that it will process. The first argument to the `Processor`
-as you could see in the listing of `run.py` program is a pattern. The 
+as you could see in the listing of `pyama.py` program is a pattern. The 
 `pyama.collector.FileCollector` class will collect the files and filters those that
 match some of the regular expressions of the segment handlers. These are the regular
 expresion patterns that are configured calling the `.file()` method on the configuration.
 
-Let's copy here the file `run.py` of this project:
+Let's copy here the file `pyama.py` of this project:
 
-[//]: # (USE SNIPPET run.py/run_py)
+[//]: # (USE SNIPPET pyama.py/run_py SKIPPER)
 ```python
 from pyama.configuration import Configuration
 from pyama.processor import Processor
 from pyama.shellsnippet import ShellSnippet
 from pyama.snippet import MdSnippetWriter, SnippetReader, SnippetMacro
+from pyama.lineskipperhandler import LineSkipper
 
 snippetWriter = MdSnippetWriter()
-MD = Configuration().file(r".*\.md$").handler(snippetWriter, SnippetReader())
+MD = Configuration().file(r".*\.md$").handler(snippetWriter, SnippetReader(),LineSkipper())
 PY = Configuration().file(r".*\.py$").handler(SnippetReader(), ShellSnippet())
 JAVA = Configuration().file(r".*\.java$").handler(SnippetReader(), SnippetMacro())
 configs = [MD, PY, JAVA]
@@ -93,7 +94,7 @@ the second pass some of the handlers modify some of the segments of some of the 
 However, it does not stop a handler class to require several more passes.
 
 The method `file_handler_match()` checks that the handler was configured for the
-very specific file to be executed. As an example we can look at the code of `run.py`
+very specific file to be executed. As an example we can look at the code of `pyama.py`
 again, which is copied into this documentation above. The segment handler `SnippetReader()`
 will run for the Markdown, Python and Java files, because an instance is passed to the 
 configuration method `handler()`. On the other and `ShellSnippet()` will only be executed

@@ -6,20 +6,21 @@ from pyama.configuration import Configuration
 from pyama.processor import Processor
 from pyama.shellsnippet import ShellSnippet
 from pyama.snippet import MdSnippetWriter, SnippetReader, SnippetMacro
+from pyama.lineskipperhandler import LineSkipper
 
 snippetWriter = MdSnippetWriter()
-# SNIPPET SKIP TILL "^MD"
+# SNIPPET SKIP AFTER '"""\)'
 snippetWriter.no_warning("""
+WARNING:pyama.snippet:undefined snippet whatever_my_snippet is used
+WARNING:pyama.snippet:snippet */whatever_my_snippet is not defined
 WARNING:pyama.snippet:snippet filename/snippetname is not defined
 WARNING:pyama.snippet:snippet filename/snippetname is not defined
 WARNING:pyama.snippet:snippet doc/snippet.md/xetters is not defined
+WARNING:pyama.snippet:snippet pyama.py/run__py is not defined
 WARNING:pyama.snippet:undefined snippet license_handler is used
 WARNING:pyama.snippet:snippet */license_handler is not defined
-WARNING:pyama.snippet:snippet run.py/run__py is not defined
-WARNING:pyama.snippet:undefined snippet whatever_my_snippet is used
-WARNING:pyama.snippet:snippet */whatever_my_snippet is not defined
 """)
-MD = Configuration().file(r".*\.md$").handler(snippetWriter, SnippetReader())
+MD = Configuration().file(r".*\.md$").handler(snippetWriter, SnippetReader(),LineSkipper())
 PY = Configuration().file(r".*\.py$").handler(SnippetReader(), ShellSnippet())
 JAVA = Configuration().file(r".*\.java$").handler(SnippetReader(), SnippetMacro())
 configs = [MD, PY, JAVA]
@@ -30,7 +31,7 @@ Processor(configs, "**/*.*").process()
 """
 EXECUTE FOR SNIPPET run_output
 python3
-run.py
+pyama.py
 -h
 END SNIPPET 
 """
