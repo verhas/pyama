@@ -4,6 +4,7 @@ import re
 from pyama.file import Segment
 from pyama.segmenthandler import SegmentHandler
 from pyama.template import SnippetFormatter
+from pyama.regex_helper import re_search
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +61,7 @@ class SnippetMacro(SegmentHandler):
                 self.regex = startline.group(1)
                 continue
             if self.regex:
-                match = re.search(self.regex, line)
+                match = re_search(self.regex, line)
                 if match and match.lastindex >= 2:
                     self.set(match.group(1), match.group(2))
 
@@ -92,7 +93,7 @@ class SnippetReader(SegmentHandler):
         :return:
         """
         for line in text:
-            match = re.search(regex, line)
+            match = re_search(regex, line)
             if match and match.lastindex >= 2:
                 self.macroset(match.group(1), match.group(2))
 

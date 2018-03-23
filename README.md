@@ -209,6 +209,8 @@ Pyama comes with an ever-expanding list of pre-cooked handlers. These are
 * [regexhandler](./doc/regexhandler.md) can execute regukar expression search and replace on
   snippet lines 
 
+* [line skipper](./doc/lineskipper.md) can remove certain lines from the segment making it possible
+  to exclude certain lines from snippets.
 
 ## More documentation
 

@@ -2,6 +2,7 @@ import logging
 import re
 
 from pyama.segmenthandler import SegmentHandler
+from pyama.regex_helper import re_search
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +56,7 @@ class LicenseHandler(SegmentHandler):
             return
         prefixes = None
         for type in self.filetypes.keys():
-            if re.search(type, segment.filename):
+            if re_search(type, segment.filename):
                 prefixes = self.filetypes[type]
                 break
         if not prefixes:
@@ -70,15 +71,15 @@ class LicenseHandler(SegmentHandler):
 
         first_license_line = prefixes['line_nr']
         while first_license_line < len(segment.text) and \
-                not re.search(prefixes['matcher'], segment.text[first_license_line]) and \
-                not re.search(prefixes['stopper'], segment.text[first_license_line]):
+                not re_search(prefixes['matcher'], segment.text[first_license_line]) and \
+                not re_search(prefixes['stopper'], segment.text[first_license_line]):
             first_license_line += 1
         license_found = first_license_line != len(segment.text) and \
-                        not re.search(prefixes['stopper'], segment.text[first_license_line])
+                        not re_search(prefixes['stopper'], segment.text[first_license_line])
         if license_found:
             logging.info("old license was found starting on line %d" % first_license_line)
             last_license_line = first_license_line
-            while last_license_line < len(segment.text) and re.search(prefixes['matcher'],
+            while last_license_line < len(segment.text) and re_search(prefixes['matcher'],
                                                                       segment.text[last_license_line]):
                 last_license_line += 1
             if last_license_line == len(segment.text):

@@ -6,6 +6,7 @@ from pyama.collector import FileCollector
 from pyama.filereader import Factory
 from pyama.filewriter import FileWriter
 from pyama.reader import Reader
+from pyama.regex_helper import re_search
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +49,7 @@ class Processor:
 
     def file_handler_match(self, file, handler):
         for config in self.configs:
-            if handler in config.handlers and any(re.search(regex, file.name) for regex in config.filename_regexes):
+            if handler in config.handlers and any(re_search(regex, file.name) for regex in config.filename_regexes):
                 return True
         return False
 

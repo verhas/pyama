@@ -1,4 +1,5 @@
 import re
+from pyama.regex_helper import re_search
 
 from pyama.segmenthandler import SegmentHandler
 
@@ -39,7 +40,7 @@ class LineSkipper(SegmentHandler):
                     if skip_lines == 0:
                         skipping = False
                     continue
-                if re.search(skip_stop, segment.text[i]):
+                if re_search(skip_stop, segment.text[i]):
                     skipping = False
                     skip_stop = None
                     if including: self.remove(segment,i)

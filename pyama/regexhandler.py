@@ -2,6 +2,8 @@ import logging
 import re
 
 from pyama.segmenthandler import SegmentHandler
+from pyama.regex_helper import re_search
+from pyama.regex_helper import re_sub
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +59,7 @@ class RegexHandler(SegmentHandler):
             killed = False
             if kills is not None:
                 for kill in kills:
-                    if re.search(kill,segment.text[i]):
+                    if re_search(kill,segment.text[i]):
                         segment.text = segment.text[:i]+segment.text[i+1:]
                         killed = True
                         break
@@ -67,7 +69,7 @@ class RegexHandler(SegmentHandler):
 
             if replaces is not None:
                 for replace in replaces:
-                    segment.text[i] = re.sub(replace[0], replace[1], segment.text[i])
+                    segment.text[i] = re_sub(replace[0], replace[1], segment.text[i])
             i += 1
 
         # save the user from shooting the foot

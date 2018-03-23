@@ -5,6 +5,7 @@ import sys
 
 from pyama.segmenthandler import SegmentHandler
 from pyama.snippet import store_snippet
+from pyama.regex_helper import re_search
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +42,7 @@ class ShellSnippet(ShellHander):
         return r'END\s+SNIPPET'
 
     def handle(self, pass_nr, segment):
-        if not re.search(ShellSnippet.start_line, segment.text[0]):
+        if not re_search(ShellSnippet.start_line, segment.text[0]):
             return
 
         exec = self.init_exec()

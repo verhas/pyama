@@ -1,6 +1,6 @@
 import glob
 import re
-
+from pyama.regex_helper import re_search
 
 class FileCollector:
     def __init__(self, configurations, *patterns):
@@ -19,7 +19,7 @@ class FileCollector:
             for file in glob.glob(pattern, recursive=True):
                 for configuration in self.configurations:
                     for regex in configuration.filename_regexes:
-                        if re.search(regex, file):
+                        if re_search(regex, file):
                             files.add(file)
 
         return files

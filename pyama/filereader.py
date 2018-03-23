@@ -2,6 +2,7 @@ import logging
 import re
 
 from pyama.file import Segment, File
+from pyama.regex_helper import re_search
 
 logger = logging.getLogger(__name__)
 
@@ -10,7 +11,7 @@ class Factory:
     def reader(self, configurations, filename):
         for configuration in configurations:
             for regex in configuration.filename_regexes:
-                if re.search(regex, filename):
+                if re_search(regex, filename):
                     return FileReader(filename, regexes=configuration.regexes)
 
 
@@ -43,7 +44,7 @@ class FileReader:
         regex is the segment end matching regular expression
         """
         for regex in self.regexes:
-            match = re.search(regex[0], line)
+            match = re_search(regex[0], line)
             if match:
                 if match.lastindex and len(match.group(1)) > 0:
                     logger.debug("line '%s' matches '%s' and name is '%s'" % (line, regex, match.group(1)))
@@ -81,7 +82,7 @@ class FileReader:
                     segment.add(line)
                     continue
 
-                if end_regex and re.search(end_regex, line):
+                if end_regex and re_search(end_regex, line):
                     logger.debug("line '%s' matches '%s' segment ending" % (line, end_regex))
                     segment.add(line)
                     segment = None
