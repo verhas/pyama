@@ -7,6 +7,7 @@ class Segment:
         self.next = None
         self.previous = None
         self.modified = False
+        self.parameters = {}
         # END SNIPPET
 
     def __str__(self):
