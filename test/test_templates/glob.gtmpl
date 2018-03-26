@@ -1,0 +1,15 @@
+
+GLOB NAME=file_list PATTERN="*.*" RECURSIVE=FALSE
+END SNIPPET
+
+GLOB NAME=file_list2 RECURSIVE=TRUE
+END SNIPPET
+
+
+USE SNIPPET ./file_list
+END SNIPPET
+
+USE SNIPPET ./file_list2
+END SNIPPET
+
+text after the snippet use, remains intact

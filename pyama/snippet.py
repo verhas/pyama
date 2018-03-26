@@ -2,9 +2,9 @@ import logging
 import re
 
 from pyama.file import Segment
+from pyama.regex_helper import re_search
 from pyama.segmenthandler import SegmentHandler
 from pyama.template import SnippetFormatter
-from pyama.regex_helper import re_search
 
 logger = logging.getLogger(__name__)
 
@@ -26,16 +26,32 @@ def get_snippets(file_name):
 
 
 def store_snippet(file_name, snippet_name, text):
+    store_data_snippet(file_name, snippet_name, text, None, None)
+
+
+def store_data_snippet(file_name, snippet_name, text, data,formatter):
     file_snippets = get_snippets(file_name)
 
     if snippet_name not in file_snippets:
         logger.debug("Starting snippet %s" % snippet_name)
-        file_snippets[snippet_name] = text
+        file_snippets[snippet_name] = Snippet()
+        file_snippets[snippet_name].text = text
+        file_snippets[snippet_name].data = data
+        file_snippets[snippet_name].formatter = formatter
     else:
         # concatenating snippets remove the start line from the appended snippet and the end line from the
         # already stored snippet
-        logger.debug("Continuing snippet %s" % snippet_name)
-        file_snippets[snippet_name] = file_snippets[snippet_name][:-1] + text[1:]
+        logger.debug("Continuing snippet %s/%s" % (file_name, snippet_name))
+        if data is not None:
+            logger.warning("Snippet %s/%s contains data and can not be continued" % (file_name, snippet_name))
+        file_snippets[snippet_name].text = file_snippets[snippet_name].text[:-1] + text[1:]
+
+
+class Snippet:
+    def __init__(self):
+        self.text = []
+        self.formatter = None
+        self.data = None
 
 
 class SnippetMacro(SegmentHandler):
@@ -137,23 +153,32 @@ class SnippetWriter(SegmentHandler):
         snippet = match.group(2)
         return self.get_snippet_text(file, snippet, segment, process)
 
-    def get_snippet_text(self, file, snippet, segment, process=True):
+    def calculate_snippet(self,snippet,segment):
+        if snippet and snippet.data and snippet.formatter:
+            text = snippet and snippet.formatter(snippet, segment)
+        else:
+            text = snippet and snippet.text[:]
+        return text
+
+    def get_snippet_text(self, file, snippet_name, segment, process=True):
         if file == '*':
-            text = self.find_joker_snippet(snippet)
+            snippet = self.find_joker_snippet(snippet_name)
+            text = self.calculate_snippet(snippet,segment)
         else:
             if file == '.':
                 file = segment.filename
-            text = file in snippets and snippet in snippets[file] and snippets[file][snippet][:]
+            snippet = file in snippets and snippet_name in snippets[file] and snippets[file][snippet_name]
+            text = self.calculate_snippet(snippet,segment)
         if not text:
-            msg = "snippet %s/%s is not defined" % (file, snippet)
+            msg = "snippet %s/%s is not defined" % (file, snippet_name)
             if msg not in self.warning_exclude:
                 logger.warning(msg)
             return False
-        logger.debug("snippet %s/%s is %s" % (file, snippet, text))
+        logger.debug("snippet %s/%s is %s" % (file, snippet_name, text))
         if process:
             return self.processed(text, segment)
         else:
-            if re.search(r"\s+TEMPLATE\s+", text[0]):
+            if re.search(r"\bTEMPLATE\b", text[0]):
                 logger.warning("snippet was used as parameter, will not be processed as template: %s" % text[0][0:-1])
             return text
 

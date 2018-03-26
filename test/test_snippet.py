@@ -5,9 +5,10 @@ import unittest
 from glob import glob
 
 from pyama.configuration import Configuration
+from pyama.globhandler import GlobHandler
 from pyama.linenumberer import LineNumberer
-from pyama.regexhandler import RegexHandler
 from pyama.processor import Processor
+from pyama.regexhandler import RegexHandler
 from pyama.snippet import SnippetWriter, SnippetReader, SnippetMacro, MdSnippetWriter
 from pyama.snippet import reset as snippetreset
 from test.testsupport import copy_template, TARGET, assertEqual
@@ -24,6 +25,11 @@ class TestSnippets(unittest.TestCase):
         for file in glob("test_templates/*.ntmpl"):
             file = file.replace("\\", "/").replace(".ntmpl", "").replace("test_templates/", "")
             self.process_single_linenumberfile(file)
+
+    def test_simple_glob(self):
+        for file in glob("test_templates/*.gtmpl"):
+            file = file.replace("\\", "/").replace(".gtmpl", "").replace("test_templates/", "")
+            self.process_glob(file)
 
     def test_simple_md_linernumberer_use(self):
         for file in glob("test_templates/*.md_tmpl"):
@@ -68,7 +74,7 @@ class TestSnippets(unittest.TestCase):
         copy_template(TEST, ext=".md", template_ext=".md_tmpl")
         TXT = Configuration() \
             .file(TARGET + TEST + ".md$") \
-            .handler(SnippetReader(), MdSnippetWriter(),LineNumberer())
+            .handler(SnippetReader(), MdSnippetWriter(), LineNumberer())
         configs = [TXT]
         processor = Processor(configs, TARGET + TEST + ".md")
         processor.process()
@@ -86,6 +92,19 @@ class TestSnippets(unittest.TestCase):
         assertEqual(TEST, ext=".ntxt")
         snippetreset()
 
+    def process_glob(self, TEST):
+        copy_template(TEST, ext=".gtxt", template_ext=".gtmpl")
+        glob_handler = GlobHandler()
+        glob_handler.my_glob = mock_glob
+        TXT = Configuration() \
+            .file(TARGET + TEST + ".gtxt") \
+            .handler(SnippetReader(), SnippetWriter(), glob_handler)
+        configs = [TXT]
+        processor = Processor(configs, TARGET + TEST + ".gtxt")
+        processor.process()
+        assertEqual(TEST, ext=".gtxt")
+        snippetreset()
+
     def process_single_file(self, TEST):
         copy_template(TEST)
         TXT = Configuration() \
@@ -96,6 +115,55 @@ class TestSnippets(unittest.TestCase):
         processor.process()
         assertEqual(TEST)
         snippetreset()
+
+
+def mock_glob(pattern, recursive=False):
+    if recursive:
+        return [
+            'sample_reader_test.txt',
+            'snippet_test.snip',
+            'testsupport.py',
+            'test_collector.py',
+            'test_filereader.py',
+            'test_globhandler.py',
+            'test_javahandler.py',
+            'test_processor.py',
+            'test_regexhandler.py',
+            'test_skipperhandler.py',
+            'test_snippet.py',
+            'test_template.py'
+            'subdir/sample_reader_test.txt',
+            'subdir/snippet_test.snip',
+            'subdir/testsupport.py',
+            'subdir/test_collector.py',
+            'subdir/test_filereader.py',
+            'subdir/test_globhandler.py',
+            'subdir/test_javahandler.py',
+            'subdir/test_processor.py',
+            'subdir/test_regexhandler.py',
+            'subdir/test_skipperhandler.py',
+            'subdir/test_snippet.py',
+            'subdir/test_template.py'
+            'subsub/subdir/sample_reader_test.txt',
+            'subsub/subdir/snippet_test.snip',
+            'subsub/subdir/testsupport.py',
+            'subsub/subdir/test_collector.py',
+        ]
+    else:
+        return [
+            'sample_reader_test.txt',
+            'snippet_test.snip',
+            'testsupport.py',
+            'test_collector.py',
+            'test_filereader.py',
+            'test_globhandler.py',
+            'test_javahandler.py',
+            'test_processor.py',
+            'test_regexhandler.py',
+            'test_skipperhandler.py',
+            'test_snippet.py',
+            'test_template.py'
+        ]
 
 
 if __name__ == '__main__':

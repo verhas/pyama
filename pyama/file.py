@@ -16,6 +16,8 @@ class Segment:
     def add(self, line):
         self.text.append(line)
 
+    def parameter(self, key):
+        return key in self.parameters and self.parameters[key]
 
 class File:
     def __init__(self, filename, segments):
