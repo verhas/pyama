@@ -67,7 +67,7 @@ class TestSnippets(unittest.TestCase):
     def process_single_linenumberfile_md(self, TEST):
         copy_template(TEST, ext=".md", template_ext=".md_tmpl")
         TXT = Configuration() \
-            .file(TARGET + TEST + ".md") \
+            .file(TARGET + TEST + ".md$") \
             .handler(SnippetReader(), MdSnippetWriter(),LineNumberer())
         configs = [TXT]
         processor = Processor(configs, TARGET + TEST + ".md")
