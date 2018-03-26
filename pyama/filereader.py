@@ -64,6 +64,18 @@ class FileReader:
         self.segment_number += 1
         return name
 
+    def analyze_parameters(self, line, segment):
+        """
+        Get the PARAM=VALUE parameters from the first lines.
+        :param line:
+        :param segment:
+        :return:
+        """
+        for match in re.finditer(r"([A-Z][A-Z0-9]*)=('|\")(.*?)\2", line):
+            segment.parameters[match.group(1)] = match.group(3)
+        for match in re.finditer(r"([A-Z][A-Z0-9]*)=([^'\"]\S*)", line):
+            segment.parameters[match.group(1)] = match.group(2)
+
     def read(self):
         """
         Read the file and split up into segments
@@ -80,6 +92,7 @@ class FileReader:
                     segments.append(segment)
                     end_regex = end_regex_
                     segment.add(line)
+                    self.analyze_parameters(line, segment)
                     continue
 
                 if end_regex and re_search(end_regex, line):

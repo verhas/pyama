@@ -39,7 +39,7 @@ USE SNIPPET ./first_snippet REPLACE "\s+" -> "+" KILL "UNDEFINED|multiple"
 END SNIPPET
 
 WITH is defined with a snippet that does not exist
-USE SNIPPET ./first_snippet REPLACE "\s+" -> "+" KILL "DELETE THIS" WITH snippet -> 'somethng'
+USE SNIPPET ./first_snippet REPLACE "\s+" -> "+" KILL "DELETE THIS" WITH snippet -> './somethng'
 END SNIPPET
 
 This is free text out of snippet

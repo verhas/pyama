@@ -42,7 +42,7 @@ USE SNIPPET ./first_snippet REPLACE "\s+" -> "+" KILL "UNDEFINED|multiple"
 END SNIPPET
 
 WITH is defined with a snippet that does not exist
-USE SNIPPET ./first_snippet REPLACE "\s+" -> "+" KILL "DELETE THIS" WITH snippet -> 'somethng'
+USE SNIPPET ./first_snippet REPLACE "\s+" -> "+" KILL "DELETE THIS" WITH snippet -> './somethng'
 this+is+the+content+of+the+first+"""{UNDEFINED:snippet}"""+no+new+line,+truncated+it+has+multiple+lines+
 END SNIPPET
 
