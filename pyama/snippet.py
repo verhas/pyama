@@ -195,7 +195,7 @@ class SnippetWriter(SegmentHandler):
                 key = match.group(1)
                 if value_is_from_snippet:
                     text = self.get_modified_text(match.group(2), segment, process=False)
-                    if text is not None:
+                    if text:
                         text = self.chomp(text)
                         value = "".join(text[1:-1])
                     else:
