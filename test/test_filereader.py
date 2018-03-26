@@ -3,11 +3,11 @@
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 import unittest
 
-from pyama.filereader import FileReader
+from pyama.filereader import FileReader,Segment
 
 
 class TestFileReader(unittest.TestCase):
-    def testReadsFile(self):
+    def test_reads_file(self):
         reader = FileReader(
             "sample_reader_test.txt",
             regexes=[(r'name="(\w+)"', 'END SEGMENT'),
@@ -31,6 +31,14 @@ class TestFileReader(unittest.TestCase):
         self.assertEqual('python_segment', file.segments[6].name)
         self.assertEqual(3, len(file.segments[6].text))
 
+    def test_analyses_parameters(self):
+        segment = Segment("name","file name")
+        line = """ SNIPPET START A=B B=13 K='ha mi' ZIG="ZA G" WITH hami -> "mami"   """
+        FileReader("whatnot",["onces"]).analyze_parameters(line,segment)
+        self.assertEqual(segment.parameters["A"],"B")
+        self.assertEqual(segment.parameters["B"],"13")
+        self.assertEqual(segment.parameters["K"],"ha mi")
+        self.assertEqual(segment.parameters["ZIG"],"ZA G")
 
 if __name__ == '__main__':
     unittest.main()
