@@ -3,7 +3,7 @@
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 import unittest
 from glob import glob
-
+import re
 from pyama.configuration import Configuration
 from pyama.globhandler import GlobHandler
 from pyama.linenumberer import LineNumberer
@@ -96,6 +96,7 @@ class TestSnippets(unittest.TestCase):
         copy_template(TEST, ext=".gtxt", template_ext=".gtmpl")
         glob_handler = GlobHandler()
         glob_handler.my_glob = mock_glob
+        glob_handler.isfile = mock_isfile
         TXT = Configuration() \
             .file(TARGET + TEST + ".gtxt") \
             .handler(SnippetReader(), SnippetWriter(), glob_handler)
@@ -117,6 +118,9 @@ class TestSnippets(unittest.TestCase):
         snippetreset()
 
 
+def mock_isfile(file):
+    return re.search(r"\.",file)
+
 def mock_glob(pattern, recursive=False):
     if recursive:
         return [
@@ -131,7 +135,7 @@ def mock_glob(pattern, recursive=False):
             'test_regexhandler.py',
             'test_skipperhandler.py',
             'test_snippet.py',
-            'test_template.py'
+            'test_template.py',
             'subdir/sample_reader_test.txt',
             'subdir/snippet_test.snip',
             'subdir/testsupport.py',
@@ -143,7 +147,7 @@ def mock_glob(pattern, recursive=False):
             'subdir/test_regexhandler.py',
             'subdir/test_skipperhandler.py',
             'subdir/test_snippet.py',
-            'subdir/test_template.py'
+            'subdir/test_template.py',
             'subsub/subdir/sample_reader_test.txt',
             'subsub/subdir/snippet_test.snip',
             'subsub/subdir/testsupport.py',

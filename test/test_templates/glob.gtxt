@@ -5,21 +5,14 @@ END SNIPPET
 GLOB NAME=file_list2 RECURSIVE=TRUE
 END SNIPPET
 
-
-USE SNIPPET ./file_list
-snippet_test.snip
-testsupport.py
-test_collector.py
-test_filereader.py
-test_globhandler.py
-test_javahandler.py
-test_processor.py
-test_regexhandler.py
-test_skipperhandler.py
-test_snippet.py
+USE SNIPPET ./file_list2 LINES=TRUE DIRONLY=TRUE
+subdir
+subsub
++-subdir
 END SNIPPET
 
-USE SNIPPET ./file_list2
+USE SNIPPET ./file_list2 LINES=TRUE DIRONLY=FALSE
+sample_reader_test.txt
 snippet_test.snip
 testsupport.py
 test_collector.py
@@ -30,20 +23,41 @@ test_processor.py
 test_regexhandler.py
 test_skipperhandler.py
 test_snippet.py
-test_template.pysubdir/sample_reader_test.txt
-subdir/snippet_test.snip
-subdir/testsupport.py
-subdir/test_collector.py
-subdir/test_filereader.py
-subdir/test_globhandler.py
-subdir/test_javahandler.py
-subdir/test_processor.py
-subdir/test_regexhandler.py
-subdir/test_skipperhandler.py
-subdir/test_snippet.py
-subdir/test_template.pysubsub/subdir/sample_reader_test.txt
-subsub/subdir/snippet_test.snip
-subsub/subdir/testsupport.py
+test_template.py
+subdir
++-sample_reader_test.txt
++-snippet_test.snip
++-testsupport.py
++-test_collector.py
++-test_filereader.py
++-test_globhandler.py
++-test_javahandler.py
++-test_processor.py
++-test_regexhandler.py
++-test_skipperhandler.py
++-test_snippet.py
++-test_template.py
+subsub
++-subdir
+  +-sample_reader_test.txt
+  +-snippet_test.snip
+  +-testsupport.py
+  +-test_collector.py
+END SNIPPET
+
+USE SNIPPET ./file_list
+sample_reader_test.txt
+snippet_test.snip
+testsupport.py
+test_collector.py
+test_filereader.py
+test_globhandler.py
+test_javahandler.py
+test_processor.py
+test_regexhandler.py
+test_skipperhandler.py
+test_snippet.py
+test_template.py
 END SNIPPET
 
 text after the snippet use, remains intact
