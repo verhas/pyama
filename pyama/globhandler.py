@@ -1,6 +1,7 @@
-import os.path
 import re
 from glob import glob
+
+import os.path
 
 from pyama.segmenthandler import SegmentHandler
 from pyama.snippet import store_data_snippet
@@ -39,7 +40,7 @@ class GlobHandler(SegmentHandler):
             return
         pattern = segment.parameter('PATTERN') or '*.*'
         recursive = segment.parameter('RECURSIVE') == "TRUE"
-        name = segment.parameters['NAME']
+        name = segment.parameter('NAME')
         files = self.my_glob(pattern, recursive=recursive)
         data = Directory()
         data.sub = {}
