@@ -8,7 +8,7 @@ END SNIPPET
 USE SNIPPET ./file_list2 LINES=TRUE DIRONLY=TRUE
 subdir
 subsub
-+-subdir
+|-subdir
 END SNIPPET
 
 USE SNIPPET ./file_list2 LINES=TRUE DIRONLY=FALSE
@@ -25,24 +25,24 @@ test_skipperhandler.py
 test_snippet.py
 test_template.py
 subdir
-+-sample_reader_test.txt
-+-snippet_test.snip
-+-testsupport.py
-+-test_collector.py
-+-test_filereader.py
-+-test_globhandler.py
-+-test_javahandler.py
-+-test_processor.py
-+-test_regexhandler.py
-+-test_skipperhandler.py
-+-test_snippet.py
-+-test_template.py
+|-sample_reader_test.txt
+|-snippet_test.snip
+|-testsupport.py
+|-test_collector.py
+|-test_filereader.py
+|-test_globhandler.py
+|-test_javahandler.py
+|-test_processor.py
+|-test_regexhandler.py
+|-test_skipperhandler.py
+|-test_snippet.py
+|-test_template.py
 subsub
-+-subdir
-  +-sample_reader_test.txt
-  +-snippet_test.snip
-  +-testsupport.py
-  +-test_collector.py
+|-subdir
+  |-sample_reader_test.txt
+  |-snippet_test.snip
+  |-testsupport.py
+  |-test_collector.py
 END SNIPPET
 
 USE SNIPPET ./file_list

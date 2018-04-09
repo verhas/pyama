@@ -45,11 +45,14 @@ class LineNumberer(SegmentHandler):
             lines = (start, end)
         else:
             lines = (1, -1)
+        # calculate the absolute and non-negative positive indices
         if lines[0] < 0:
             lines = (lines[0] + len(segment.text), lines[1])
         if lines[1] < 0:
             lines = (lines[0], lines[1] + len(segment.text))
 
+        # ensure limits are in the line indexing range
+        lines = (max(0, lines[0]), max(0, lines[1]))
         lines = (min(lines[0], len(segment.text)), min(lines[1], len(segment.text)))
 
         match = re.search(r"FORMAT='([^']*)'", number_spec)
@@ -58,10 +61,8 @@ class LineNumberer(SegmentHandler):
         if match:
             nr_format = match.group(1)
         else:
-            if line_number + (lines[1] - lines[0]) * step <= 10:
-                nr_format = "{:d}. "
-            else:
-                nr_format = "{:2d}. "
+            width_diff = str(len(str(line_number + (lines[1] - 1 - lines[0]) * step)))
+            nr_format = "{:" + width_diff + "d}. "
 
         # process the intermediate lines, not the first and the last
         i = lines[0]

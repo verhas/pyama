@@ -67,7 +67,7 @@ directory_indent = 2
 
 def append_single_name(name, text, level, lines):
     if lines and level > 1:
-        text.append(("{:>" + "%s" % (level - 2) + "s}+-{}\n").format('', name))
+        text.append(("{:>" + "%s" % (level - 2) + "s}|-{}\n").format('', name))
     else:
         text.append(("{:>" + "%s" % level + "s}{}\n").format('', name))
 
