@@ -1,9 +1,9 @@
 import logging
 import re
 
-from pyama.segmenthandler import SegmentHandler
 from pyama.regex_helper import re_search
 from pyama.regex_helper import re_sub
+from pyama.segmenthandler import SegmentHandler
 
 logger = logging.getLogger(__name__)
 
@@ -44,13 +44,15 @@ class RegexHandler(SegmentHandler):
             replaces = self.get_replace_tuples(match.group(1))
         else:
             replaces = None
-        match = re.search(r"KILL (.*)",segment.text[0])
+        match = re.search(r"KILL (.*)", segment.text[0])
         if match:
             kills = self.get_kill_regexes(match.group(1))
         else:
             kills = None
+        trim = re.search(r"TRIM", segment.text[0])
+        trim_start = 2 if re.search(r"TRIM\s+MD", segment.text[0]) else 1
 
-        if replaces is None and kills is None:
+        if replaces is None and kills is None and not trim:
             return segment.text
 
         # process the intermediate lines, not the first and the last
@@ -59,8 +61,8 @@ class RegexHandler(SegmentHandler):
             killed = False
             if kills is not None:
                 for kill in kills:
-                    if re_search(kill,segment.text[i]):
-                        segment.text = segment.text[:i]+segment.text[i+1:]
+                    if re_search(kill, segment.text[i]):
+                        segment.text = segment.text[:i] + segment.text[i + 1:]
                         killed = True
                         break
 
@@ -72,9 +74,27 @@ class RegexHandler(SegmentHandler):
                     segment.text[i] = re_sub(replace[0], replace[1], segment.text[i])
             i += 1
 
+        trim_size = 0
+        if trim:
+            i = trim_start
+            while i < len(segment.text) - 1:
+                if len(segment.text[i]) > trim_size:
+                    trim_size = len(segment.text[i])
+                i += 1
+            i = trim_start
+            while i < len(segment.text) - 1:
+                space_nr = len(segment.text[i]) - len(segment.text[i].lstrip())
+                if len(segment.text[i].lstrip()) > 0 and trim_size > space_nr: trim_size = space_nr
+                i += 1
+            i = trim_start
+            while i < len(segment.text) - 1:
+                if trim_size > 0 and len(segment.text[i]) > 0 :
+                    segment.text[i] = segment.text[i][trim_size:]
+                i += 1
+
         # save the user from shooting the foot
         # may accidentally remove the new-line characters, but even then the last line has to have a new line
-        if segment.text[-2][-1] != "\n":
+        if len(segment.text[-2]) == 0 or segment.text[-2][-1] != "\n":
             segment.text[-2] = segment.text[-2] + "\n"
         return segment.text
 
