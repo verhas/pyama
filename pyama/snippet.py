@@ -234,22 +234,24 @@ class SnippetWriter(SegmentHandler):
 
     def find_joker_snippet(self, snippet):
         found_nr = 0
-        text = False
+        collected = False
         for k, v in snippets.items():
             found = snippet in v and v[snippet]
             if found:
-                if text:
-                    text = text[:-1] + found[1:]
+                if collected:
+                    collected.text = collected.text[:-1] + found.text[1:]
                 else:
-                    text = found
+                    collected = found
                 found_nr += 1
         if found_nr == 0:
             msg = "undefined snippet %s is used" % snippet
             if msg not in self.warning_exclude:
                 logger.warning(msg)
         if found_nr > 1:
-            logger.warning("used snippet %s is defined in multiple files" % snippet)
-        return text
+            msg = "used snippet %s is defined in multiple files" % snippet
+            if msg not in self.warning_exclude:
+                logger.warning(msg)
+        return collected
 
     def chomp(self, text, inline=True):
         """remove the last \n if the segment is to be chomped"""
