@@ -15,7 +15,7 @@ class LineNumberer(SegmentHandler):
 
     def line_numbering(self, segment):
         """ postprocess the lines in case there is any REPLACE command on the first line"""
-        match = re.search(r"NUMBER\s+(.*)", segment.text[0])
+        match = re.search(r"NUMBER\b(.*)", segment.text[0])
         if not match:
             return segment.text
         number_spec = match.group(1)
