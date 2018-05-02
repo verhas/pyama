@@ -50,7 +50,7 @@ class RegexHandler(SegmentHandler):
         else:
             kills = None
         trim = re.search(r"TRIM", segment.text[0])
-        trim_start = 2 if re.search(r"TRIM\s+MD", segment.text[0]) else 1
+        trim_start = 2 if trim and segment.text[1].startswith('```') else 1
 
         if replaces is None and kills is None and not trim:
             return segment.text
