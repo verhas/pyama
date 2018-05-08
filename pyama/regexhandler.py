@@ -84,11 +84,12 @@ class RegexHandler(SegmentHandler):
             i = trim_start
             while i < len(segment.text) - 1:
                 space_nr = len(segment.text[i]) - len(segment.text[i].lstrip())
-                if len(segment.text[i].lstrip()) > 0 and trim_size > space_nr: trim_size = space_nr
+                if len(segment.text[i].lstrip()) > 0 and trim_size > space_nr:
+                    trim_size = space_nr
                 i += 1
             i = trim_start
             while i < len(segment.text) - 1:
-                if trim_size > 0 and len(segment.text[i]) > 0 :
+                if trim_size > 0 and len(segment.text[i].lstrip()) > 0 :
                     segment.text[i] = segment.text[i][trim_size:]
                 i += 1
 
