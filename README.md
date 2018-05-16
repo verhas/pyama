@@ -214,6 +214,9 @@ Pyama comes with an ever-expanding list of pre-cooked handlers. These are
 * [line skipper](./doc/lineskipper.md) can remove certain lines from the segment making it possible
   to exclude certain lines from snippets.
 
+* [python snippet](./doc/pysnippet.md) can execute small Python scrip snippets that are embedded into the
+  source code.
+
 ## More documentation
 
 If you have the segment handlers and can run python code and you are satisfied then
