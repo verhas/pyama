@@ -20,8 +20,14 @@ USE SNIPPET ./mm
 END SNIPPET
 
 PYTHON SNIPPET other_globals GLOBALS="other globals"
-print(h)
+try:
+    print(h)
+except NameError:
+    print("h was not defined")
+else:
+    print("h was defined")
 END SNIPPET
 
 USE SNIPPET ./other_globals
 END SNIPPET
+

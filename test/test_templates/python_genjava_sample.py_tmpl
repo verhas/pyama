@@ -1,0 +1,31 @@
+public class SimpleThreadIntermingling {
+/* PYTHON SNIPPET thread_create
+nr_threads = 20
+for i in range(1,nr_threads+1):
+    print("        Thread t"+str(i)+" = new MyThread(\"t"+str(i)+"\");")
+for i in range(1,nr_threads+1):
+    print("        t"+str(i)+".start();")
+END SNIPPET*/
+
+    public static void main(String[] args) {
+    //USE SNIPPET ./thread_create
+    //END SNIPPET
+        System.out.print("started ");
+
+    }
+
+    static class MyThread extends Thread {
+        private final String name;
+
+        MyThread(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public void run() {
+            for (int i = 1; i < 1000; i++) {
+                System.out.print(name + " " + i + ", ");
+            }
+        }
+    }
+}
