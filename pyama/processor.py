@@ -49,7 +49,9 @@ class Processor:
 
     def file_handler_match(self, file, handler):
         for config in self.configs:
-            if handler in config.handlers and any(re_search(regex, file.name) for regex in config.filename_regexes):
+            if handler in config.handlers and \
+                any(re_search(regex, file.name) for regex in config.filename_regexes) and\
+                    not any(re_search(regex, file.name) for regex in config.filename_excludes ):
                 return True
         return False
 

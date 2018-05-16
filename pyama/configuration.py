@@ -2,6 +2,7 @@ class Configuration:
     def __init__(self):
         self.filename_patterns = []
         self.filename_regexes = []
+        self.filename_excludes = []
         self.regexes = []
         self.segmenthandlers = {}
         self.max_passes = 0
@@ -9,6 +10,10 @@ class Configuration:
 
     def file(self, regex):
         self.filename_regexes.append(regex)
+        return self
+
+    def exclude(self, regex):
+        self.filename_excludes.append(regex)
         return self
 
     def handler(self, *handlers):
