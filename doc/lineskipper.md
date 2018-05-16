@@ -8,10 +8,11 @@ seen in the `pyama.py` file in this project:
 [//]: # (USE SNIPPET pyama.py/run_py SKIPPER REMOVE)
 ```python
 from pyama.configuration import Configuration
+from pyama.lineskipperhandler import LineSkipper
 from pyama.processor import Processor
+from pyama.regexhandler import RegexHandler
 from pyama.shellsnippet import ShellSnippet
 from pyama.snippet import MdSnippetWriter, SnippetReader, SnippetMacro
-from pyama.lineskipperhandler import LineSkipper
 
 snippetWriter = MdSnippetWriter()
 snippetWriter.no_warning("""
@@ -24,10 +25,11 @@ WARNING:pyama.snippet:snippet pyama.py/run__py is not defined
 WARNING:pyama.snippet:undefined snippet license_handler is used
 WARNING:pyama.snippet:snippet */license_handler is not defined
 """)
-MD = Configuration().file(r".*\.md$").handler(snippetWriter, SnippetReader(),LineSkipper())
+MD = Configuration().file(r".*\.md$").handler(snippetWriter, SnippetReader(), LineSkipper())
+SEGMENT = Configuration().file(r".*\.md$").exclude(r"regexhandler\.md").handler(RegexHandler())
 PY = Configuration().file(r".*\.py$").handler(SnippetReader(), ShellSnippet())
 JAVA = Configuration().file(r".*\.java$").handler(SnippetReader(), SnippetMacro())
-configs = [MD, PY, JAVA]
+configs = [MD, PY, JAVA, SEGMENT]
 
 Processor(configs, "**/*.*").process()
 ``` 
@@ -40,16 +42,18 @@ configuration of Pyama. What we want to display is:
 [//]: # (USE SNIPPET pyama.py/run_py SKIPPER)
 ```python
 from pyama.configuration import Configuration
+from pyama.lineskipperhandler import LineSkipper
 from pyama.processor import Processor
+from pyama.regexhandler import RegexHandler
 from pyama.shellsnippet import ShellSnippet
 from pyama.snippet import MdSnippetWriter, SnippetReader, SnippetMacro
-from pyama.lineskipperhandler import LineSkipper
 
 snippetWriter = MdSnippetWriter()
-MD = Configuration().file(r".*\.md$").handler(snippetWriter, SnippetReader(),LineSkipper())
+MD = Configuration().file(r".*\.md$").handler(snippetWriter, SnippetReader(), LineSkipper())
+SEGMENT = Configuration().file(r".*\.md$").exclude(r"regexhandler\.md").handler(RegexHandler())
 PY = Configuration().file(r".*\.py$").handler(SnippetReader(), ShellSnippet())
 JAVA = Configuration().file(r".*\.java$").handler(SnippetReader(), SnippetMacro())
-configs = [MD, PY, JAVA]
+configs = [MD, PY, JAVA, SEGMENT]
 
 Processor(configs, "**/*.*").process()
 ``` 
@@ -110,10 +114,11 @@ What we want to avoid is this:
 [//]: # (USE SNIPPET pyama.py/run_py)
 ```python
 from pyama.configuration import Configuration
+from pyama.lineskipperhandler import LineSkipper
 from pyama.processor import Processor
+from pyama.regexhandler import RegexHandler
 from pyama.shellsnippet import ShellSnippet
 from pyama.snippet import MdSnippetWriter, SnippetReader, SnippetMacro
-from pyama.lineskipperhandler import LineSkipper
 
 snippetWriter = MdSnippetWriter()
 # SNIPPET SKIP AFTER '"""\)'
@@ -127,10 +132,11 @@ WARNING:pyama.snippet:snippet pyama.py/run__py is not defined
 WARNING:pyama.snippet:undefined snippet license_handler is used
 WARNING:pyama.snippet:snippet */license_handler is not defined
 """)
-MD = Configuration().file(r".*\.md$").handler(snippetWriter, SnippetReader(),LineSkipper())
+MD = Configuration().file(r".*\.md$").handler(snippetWriter, SnippetReader(), LineSkipper())
+SEGMENT = Configuration().file(r".*\.md$").exclude(r"regexhandler\.md").handler(RegexHandler())
 PY = Configuration().file(r".*\.py$").handler(SnippetReader(), ShellSnippet())
 JAVA = Configuration().file(r".*\.java$").handler(SnippetReader(), SnippetMacro())
-configs = [MD, PY, JAVA]
+configs = [MD, PY, JAVA, SEGMENT]
 
 Processor(configs, "**/*.*").process()
 ``` 

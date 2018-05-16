@@ -256,16 +256,18 @@ those file segments that belong to files they are configured for.
 [//]: # (USE SNIPPET pyama.py/run_py SKIPPER)
 ```python
 from pyama.configuration import Configuration
+from pyama.lineskipperhandler import LineSkipper
 from pyama.processor import Processor
+from pyama.regexhandler import RegexHandler
 from pyama.shellsnippet import ShellSnippet
 from pyama.snippet import MdSnippetWriter, SnippetReader, SnippetMacro
-from pyama.lineskipperhandler import LineSkipper
 
 snippetWriter = MdSnippetWriter()
-MD = Configuration().file(r".*\.md$").handler(snippetWriter, SnippetReader(),LineSkipper())
+MD = Configuration().file(r".*\.md$").handler(snippetWriter, SnippetReader(), LineSkipper())
+SEGMENT = Configuration().file(r".*\.md$").exclude(r"regexhandler\.md").handler(RegexHandler())
 PY = Configuration().file(r".*\.py$").handler(SnippetReader(), ShellSnippet())
 JAVA = Configuration().file(r".*\.java$").handler(SnippetReader(), SnippetMacro())
-configs = [MD, PY, JAVA]
+configs = [MD, PY, JAVA, SEGMENT]
 
 Processor(configs, "**/*.*").process()
 ```
