@@ -172,6 +172,7 @@ The structure of a segment is defined in the class `pyama.file.Segment`:
         self.next = None
         self.previous = None
         self.modified = False
+        self.parameters = {}
 ```
 
 The `name` is the name of the segment as defined in the snippet starting line or "0", "1",
