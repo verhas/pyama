@@ -87,14 +87,14 @@ class TestSnippets(unittest.TestCase):
         snippetreset()
 
     def process_single_linenumberfile_md(self, TEST):
-        copy_template(TEST, ext=".md", template_ext=".md_tmpl")
+        copy_template(TEST, ext=".md_", template_ext=".md_tmpl")
         TXT = Configuration() \
-            .file(TARGET + TEST + ".md$") \
+            .file(TARGET + TEST + ".md_$") \
             .handler(SnippetReader(), MdSnippetWriter(), LineNumberer())
         configs = [TXT]
-        processor = Processor(configs, TARGET + TEST + ".md")
+        processor = Processor(configs, TARGET + TEST + ".md_")
         processor.process()
-        assertEqual(TEST, ext=".md")
+        assertEqual(TEST, ext=".md_")
         snippetreset()
 
     def process_single_linenumberfile(self, TEST):
