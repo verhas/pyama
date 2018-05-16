@@ -87,6 +87,14 @@ handler runs in pass 3. After that in pass 4 you may want to run the line number
 handler. On the other hand if you do not use the regular expression handler to delete the
 line numbers, or at all, then you can run the numbering in pass 3.
 
+A handler may decide during execution to alter the list of the passes it needs to be invoked.
+The method `passes()` will be invoked before each invocation of the handler to decide if
+it needs to be invoked. However if a handler
+decides that it needs another pass to work and there was no such pass scheduled at the start
+of the processing the next pass will not happen. In other words if the largest number of the passes
+returned by the methods `passes()` during startup was `N` then there will not be a pass `N+1`
+even if some handler returns `N+1` as member of the list returned by `passes()` during execution.
+
 ## `start`
 
 The implementation of this method is usually a simple `return str` statement that

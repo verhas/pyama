@@ -77,23 +77,23 @@ configured to be executed in the actual pass then it is executed for each segmen
 in each file. It is a bit complex in English, the Python code is more explanatory in this case.
 The code that actually does this is included here:
  
-[//]: # (USE SNIPPET */runhandlers)
+[//]: # (USE SNIPPET */runhandlers TRIM)
 ```python
-    def run_handlers(self):
-        for pass_nr in range(1, self.passes + 1):
-            for handler in self.handlers:
-                if pass_nr in handler.passes():
-                    for file in self.files:
-                        if self.file_handler_match(file, handler):
-                            for segment in file.segments:
-                                handler.handle(pass_nr, segment)
+def run_handlers(self):
+    for pass_nr in range(1, self.passes + 1):
+        for handler in self.handlers:
+            if pass_nr in handler.passes():
+                for file in self.files:
+                    if self.file_handler_match(file, handler):
+                        for segment in file.segments:
+                            handler.handle(pass_nr, segment)
 ```
 
 The handlers define a method `passes()` that return a list of numbers including the passes
 when they have to be included. This is a fairly general approach. Usually the number of
 passes is two. In the first pass the handlers collect information from the files. During
 the second pass some of the handlers modify some of the segments of some of the files.
-However, it does not stop a handler class to require several more passes.
+However, it does not stop a handler object to require several more passes.
 
 The method `file_handler_match()` checks that the handler was configured for the
 very specific file to be executed. As an example we can look at the code of `pyama.py`
@@ -104,7 +104,7 @@ when the current file is a Python file, because it is configured only for the Py
 
 ## Wiring the files
 
-After the execution of all the handlers pyama writes the files that were cahnged.
+After the execution of all the handlers pyama writes the files that were changed.
 
 Be careful especially when you execute some segment handlers that were not fully tested
 before. Before executing pyama commit all changes to the repo and check the result.

@@ -229,3 +229,4 @@ then go on.
 
 * [Architecture, structure of pyama](./doc/architecture.md)
 * [Writing segment handlers](./doc/segmenthandlers.md)
+* [Configuring pyama](./doc/configuration.md)
