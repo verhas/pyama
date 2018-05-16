@@ -1,0 +1,37 @@
+
+PYTHON SNIPPET numbers GLOBALS="*"
+for i in range(0,10):
+  print(i)
+
+global h
+h = 13
+
+END SNIPPET
+
+USE SNIPPET ./numbers
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+END SNIPPET
+
+PYTHON SNIPPET mm GLOBALS="*"
+print(h)
+END SNIPPET
+
+USE SNIPPET ./mm
+13
+END SNIPPET
+
+PYTHON SNIPPET other_globals GLOBALS="other globals"
+print(h)
+END SNIPPET
+
+USE SNIPPET ./other_globals
+END SNIPPET
