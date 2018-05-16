@@ -67,6 +67,7 @@ class SnippetMacro(SegmentHandler):
 
     def handle(self, pass_nr, segment):
         if segment.name == "0":
+            # at the start of a file there is no matching defined
             self.regex = None
         for line in segment.text[1:-1]:
             if re.search(r"NO\s+MATCH\W", line):
@@ -164,6 +165,14 @@ class SnippetWriter(SegmentHandler):
         if file == '*':
             snippet = self.find_joker_snippet(snippet_name)
             text = self.calculate_snippet(snippet,segment)
+        elif file.startswith('*') or file.endswith('*'):
+            reg = re.sub(r'\.',r'\.',file)
+            if file.startswith('*'):
+                reg = ".*" + reg[1:]
+            if file.endswith('*'):
+                reg = reg[:-1] + ".*"
+            snippet = self.find_joker_snippet(snippet_name,reg=reg)
+            text = self.calculate_snippet(snippet, segment)
         else:
             if file == '.':
                 file = segment.filename
@@ -232,17 +241,18 @@ class SnippetWriter(SegmentHandler):
                 break
         return local
 
-    def find_joker_snippet(self, snippet):
+    def find_joker_snippet(self, snippet, reg='.*'):
         found_nr = 0
         collected = False
         for k, v in snippets.items():
-            found = snippet in v and v[snippet]
-            if found:
-                if collected:
-                    collected.text = collected.text[:-1] + found.text[1:]
-                else:
-                    collected = found
-                found_nr += 1
+            if re.match(reg,k):
+                found = snippet in v and v[snippet]
+                if found:
+                    if collected:
+                        collected.text = collected.text[:-1] + found.text[1:]
+                    else:
+                        collected = found
+                    found_nr += 1
         if found_nr == 0:
             msg = "undefined snippet %s is used" % snippet
             if msg not in self.warning_exclude:

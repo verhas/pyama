@@ -1,7 +1,6 @@
 
-/**
- * This is a Javadoc
- *
+/*
+ * This is the test LICENSE.txt file
  */
 public class MyClass {
     // FIELDS

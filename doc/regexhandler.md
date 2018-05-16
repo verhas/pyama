@@ -2,9 +2,19 @@
 
 The regular expression handler can be used to execute regular expression based
 search and replace on the lines of a segment and to delete lines from a segment.
+
+```python
+from pyama.regexhandler import RegexHandler
+
+CONF = Configuration().file(r".*\.extension$").handler(RegexHandler(runpass=[3]))
+Processor([CONF], "**/*.*").process()
+```
+
+
 This handler does not define any segment delimiter. It has to be used with
-som other handler. Typically it is used together with the snippet handler in the
-third pass after the snippets were updated in the segments.
+some other handler. Typically it is used together with the snippet handler in the
+third pass after the snippets were updated in the segments. By default this handler
+is configured to run in the third pass (only).
 
 ## Sample Use
 
@@ -41,6 +51,12 @@ END SNIPPET
 ```
 
 with the appropriate snippet handler, regular expression handler and line numbering handler.
+Note that the usual use of line numbering does not require the deletion of the line numbers.
+The usual use of line numbering is that the lines of a snippet are numbered. In that case when
+the lines of the snipped are copied into the segment during the second pass they have no
+numbers and then they will just normally be numbered. Line number deletion is needed when
+you want to number a segment that is not the result of a snippet copy but rather edited
+manually.
 
 ## Format
 

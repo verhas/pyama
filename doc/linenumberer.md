@@ -1,7 +1,17 @@
 # Line numbering handler
 
-The line numbering handler is a very simple one. It numbers the lines of the segment
-if the first line of the segment contains 
+The line numbering handler is a very simple one to number lines in a segment.
+
+Configuration is as usual:
+
+```python
+from pyama.linenumberer import LineNumberer
+
+CONF = Configuration().file(r".*\.extension$").handler(LineNumberer())
+Processor([CONF], "**/*.*").process()
+```
+
+It numbers the lines of the segment if the first line of the segment contains
 
 ```bash
 NUMBER
@@ -15,17 +25,13 @@ NUMBER START=1 STEP=1 FORMAT="{:d}. LINES=n:m"
 
 Both `START` and `FORMAT` are optional.
 
-
-Using `START` you can define the start value where the line 
-numbering starts. The value following the
+Using `START` you can define the start value where the line numbering starts. The value following the
 keyword `START` has to be an unsigned positive integer.
 
-Using `STEP` you can define the step value between the 
-line numbers. The value following the
+Using `STEP` you can define the step value between the line numbers. The value following the
 keyword `STEP` has to be an unsigned positive integer.
 
-Using `FORMAT` you can define the format of the number.
-The default is to use the decimal format of the
+Using `FORMAT` you can define the format of the number. The default is to use the decimal format of the
 line number followed by a dot and a space. If the snippet is less than 10 lines
 then a single digit. If the snippet is more than 10 lines, or the numbering starts
 so that the last line number is greater than 9 then the default format is

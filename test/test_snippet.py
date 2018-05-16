@@ -12,7 +12,7 @@ from pyama.regexhandler import RegexHandler
 from pyama.snippet import SnippetWriter, SnippetReader, SnippetMacro, MdSnippetWriter
 from pyama.snippet import reset as snippetreset
 from test.testsupport import copy_template, TARGET, assertEqual
-
+from pyama.pysnippet import PySnippet
 
 class TestSnippets(unittest.TestCase):
 
@@ -41,6 +41,11 @@ class TestSnippets(unittest.TestCase):
             file = file.replace("\\", "/").replace(".tmpl", "").replace("test_templates/", "")
             self.process_single_file(file)
 
+    def test_py_snippet(self):
+        for file in glob("test_templates/*.py_tmpl"):
+            file = file.replace("\\", "/").replace(".py_tmpl", "").replace("test_templates/", "")
+            self.process_single_py_file(file)
+
     def test_complex_templating(self):
         TEST = "template_complex"
         copy_template(TEST, template_ext=".tmpl_x")
@@ -57,6 +62,17 @@ class TestSnippets(unittest.TestCase):
         macro.set("dict", {"a": "1", "b": 2, "c": 3})
         processor.process()
         assertEqual(TEST)
+        snippetreset()
+
+    def process_single_py_file(self, TEST):
+        copy_template(TEST, ext=".py_txt", template_ext=".py_tmpl")
+        TXT = Configuration() \
+            .file(TARGET + TEST + ".py_txt$") \
+            .handler(SnippetReader(), SnippetWriter(),PySnippet())
+        configs = [TXT]
+        processor = Processor(configs, TARGET + TEST + ".py_txt")
+        processor.process()
+        assertEqual(TEST, ext=".py_txt")
         snippetreset()
 
     def process_single_processed_use(self, TEST):

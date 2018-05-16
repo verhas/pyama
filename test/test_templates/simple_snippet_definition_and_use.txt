@@ -12,3 +12,14 @@ it has multiple lines
 END SNIPPET
 
 text after the snippet use, remains intact
+
+USE SNIPPET *use/first_snippet
+this is the content of the first snippet
+it has multiple lines
+END SNIPPET
+
+USE SNIPPET *_and_*/first_snippet
+this is the content of the first snippet
+it has multiple lines
+END SNIPPET
+

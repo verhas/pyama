@@ -1,5 +1,15 @@
 # Snippet Handler
 
+To use the snippet handler you should configure it in your `run.py` script
+
+```python
+from pyama.snippet import SnippetWriter, SnippetReader, SnippetMacro
+
+CONF = Configuration().file(r".*\.extension$").handler(SnippetWriter(), SnippetReader())
+Processor([CONF], "**/*.*").process()
+```
+
+
 The snippet handler collects snippets from program source files and inserts these lines
 into documentation files.
 
@@ -60,6 +70,13 @@ snippets with that name then the snippet handler will concatenate them.
 
 Another shorthand is to use a `.` (dot) as a file name. In that case, we refer to the named
 snippet defined in the same file.
+
+You can also use the `*` character before the file name specification and also after it. In
+this case any file containing the snippet of the name that has a name that has the
+prefix, postfix and infix of the specified file name specification will be used. This is
+handy when your files are in different and deep directory structures but still the file
+names are unique. In that case you can write `*my_file.php/snippet` instead of specifying
+all the path that precedes the file name.
 
 When the snippet is copied the first and the last lines of the copied snippet are 
 not copied. That way, for example, using the example snippet `main_java` the code
