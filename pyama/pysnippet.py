@@ -14,11 +14,14 @@ snippet_globals_dict = dict()
 class PySnippet(SegmentHandler):
     start_line = r'PYTHON\s+SNIPPET\s+(\w[\w\d_]*)'
 
+    def __init__(self, runpass=[1]):
+        self.runpass = runpass
+
     def passes(self):
         '''
         :return: snippets are read into memory in the first round and then they are not read any more
         '''
-        return [1]
+        return self.runpass
 
     def start(self):
         return PySnippet.start_line

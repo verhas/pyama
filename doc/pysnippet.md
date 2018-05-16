@@ -7,12 +7,15 @@ purpose is an overkill. In that case you can configure `PySnippet` to run python
 and the output of the code executed will become the text of the snippet that can be
 referenced and used.
 
+The handler runs in the first pass unless it is configured differently using the
+`runpass` argument of the constructor.
+
 To use the handler you can configure in your main script:
 
 ```python
 from pyama.pysnippet import PySnippet
 
-CONF = Configuration().file(r".*\.extension$").handler(PySnippet())
+CONF = Configuration().file(r".*\.extension$").handler(PySnippet(runpass=[1]))
 Processor([CONF], "**/*.*").process()
 ```
 

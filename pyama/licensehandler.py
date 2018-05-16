@@ -1,14 +1,14 @@
 import logging
-import re
 
-from pyama.segmenthandler import SegmentHandler
 from pyama.regex_helper import re_search
+from pyama.segmenthandler import SegmentHandler
 
 logger = logging.getLogger(__name__)
 
 
 class LicenseHandler(SegmentHandler):
-    def __init__(self):
+    def __init__(self, runpass=[1]):
+        self.runpass = runpass
         self.text = []
         self.filetypes = {
             r".*\.java$": {'line_nr': 0,
@@ -43,7 +43,10 @@ class LicenseHandler(SegmentHandler):
         logger.debug("license text is \n%s\n" % "".join(self.text))
 
     def passes(self):
-        return [1]
+        '''
+        :return: snippets are read into memory in the first round and then they are not read any more
+        '''
+        return self.runpass
 
     def start(self):
         return None
