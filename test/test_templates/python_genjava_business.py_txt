@@ -1,0 +1,39 @@
+/* PYTHON SNIPPET xxx
+fields = ["String name", "String office", "BigDecimal salary"]
+print("    public void setParameters(",end="")
+print(", ".join(fields), end="")
+print("){")
+for field in fields:
+    field_name = field.split(" ")[1]
+    print("        this." + field_name + " = " + field_name + ";")
+print("        }")
+
+print("""
+    public Map getMap(){
+        Map retval = new HashMap();\
+""")
+for field in fields:
+    field_name = field.split(" ")[1]
+    print("        retval.put(\""+field_name+"\", this."+field_name+");")
+print("        return retval;\n        }")
+
+END SNIPPET*/
+
+public class SimpleBusinessObject {
+    //USE SNIPPET ./xxx
+    public void setParameters(String name, String office, BigDecimal salary){
+        this.name = name;
+        this.office = office;
+        this.salary = salary;
+        }
+
+    public Map getMap(){
+        Map retval = new HashMap();
+        retval.put("name", this.name);
+        retval.put("office", this.office);
+        retval.put("salary", this.salary);
+        return retval;
+        }
+    //END SNIPPET
+
+}
