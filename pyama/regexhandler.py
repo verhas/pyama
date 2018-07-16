@@ -21,7 +21,7 @@ class RegexHandler(SegmentHandler):
     def get_replace_tuples(self, line):
         tuples = []
         while True:
-            match = re.search(r'(\'|")(.*?)\1\s*->\s*(\'|")(.*?)\3(.*)$', line)
+            match = re.search(r'^\s*(\'|")(.*?)\1\s*->\s*(\'|")(.*?)\3(.*)$', line)
             if not match: break
             tuple = (match.group(2), match.group(4))
             line = match.group(5)
