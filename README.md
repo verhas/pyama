@@ -208,7 +208,7 @@ Pyama comes with an ever-expanding list of pre-cooked handlers. These are
 
 * [linenumberer](./doc/linenumberer.md) can put line numbers on lines in snippets
  
-* [regexhandler](./doc/regexhandler.md) can execute regukar expression search and replace on
+* [regexhandler](./doc/regexhandler.md) can execute regular expression search and replace on
   snippet lines 
 
 * [line skipper](./doc/lineskipper.md) can remove certain lines from the segment making it possible
