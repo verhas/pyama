@@ -31,7 +31,7 @@ class RegexHandler(SegmentHandler):
     def get_kill_regexes(self, line):
         regexes = []
         while True:
-            match = re.search(r'(\'|")(.*?)\1\s*(.*)$', line)
+            match = re.search(r'^\s*(\'|")(.*?)\1\s*(.*)$', line)
             if not match: break
             line = match.group(3)
             regexes.append(match.group(2))
